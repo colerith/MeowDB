@@ -18,3 +18,10 @@ export function renderPanel(target: HTMLElement) {
   app.mount(target);
   mountedEl = target;
 }
+
+export function unmountPanel() {
+  if (!app) return;
+  app.unmount();
+  app = null;
+  mountedEl = null;
+}

@@ -18,3 +18,8 @@ export function remountPanelContainer(): HTMLElement | null {
   mountAfterLastMes(container);
   return container;
 }
+
+export function removePanelContainer(): void {
+  const container = document.querySelector('.meow-db-panel') as HTMLElement | null;
+  container?.remove();
+}
