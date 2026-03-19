@@ -23,5 +23,3 @@ export async function saveCurrentEntry(entry: MeowDBEntry): Promise<boolean> {
 export * from './migrator';
 export * from './validator';
 export * from './serializer';
-
-
