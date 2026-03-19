@@ -8,4 +8,3 @@ export function parseEntryObject(entry: unknown): MeowDBEntry | null {
   const parsed = MeowDBEntrySchema.safeParse(entry);
   return parsed.success ? parsed.data : null;
 }
-
