@@ -229,4 +229,16 @@ async function manualUpdate() {
   refresh();
   toastr.success('AI 更新完成');
 }
+
+function onDataUpdated() {
+  refresh();
+}
+
+onMounted(() => {
+  window.addEventListener('meowdb:data-updated', onDataUpdated);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('meowdb:data-updated', onDataUpdated);
+});
 </script>

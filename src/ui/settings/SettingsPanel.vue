@@ -46,32 +46,79 @@
         </label>
         <label class="meowdb-setting-row meowdb-setting-stack">
           <span>API URL</span>
-          <input v-model="settings.api_url" type="text" placeholder="https://api.openai.com/v1" />
+          <input class="meowdb-input" v-model="settings.api_url" type="text" placeholder="https://api.openai.com/v1" />
         </label>
         <label class="meowdb-setting-row meowdb-setting-stack">
           <span>API Key</span>
-          <input v-model="settings.api_key" type="password" placeholder="sk-..." />
+          <input class="meowdb-input" v-model="settings.api_key" type="password" placeholder="sk-..." />
         </label>
         <label class="meowdb-setting-row meowdb-setting-stack">
           <span>Model</span>
-          <input v-model="settings.api_model" type="text" placeholder="gpt-4.1-mini" />
+          <input class="meowdb-input" v-model="settings.api_model" type="text" placeholder="gpt-4.1-mini" />
         </label>
         <label class="meowdb-setting-row">
           <span>Temperature</span>
-          <input v-model.number="settings.api_temperature" type="number" min="0" max="2" step="0.1" />
+          <input
+            class="meowdb-input"
+            v-model.number="settings.api_temperature"
+            type="number"
+            min="0"
+            max="2"
+            step="0.1"
+          />
         </label>
         <label class="meowdb-setting-row">
           <span>Max Tokens</span>
-          <input v-model.number="settings.api_max_tokens" type="number" min="128" step="64" />
+          <input class="meowdb-input" v-model.number="settings.api_max_tokens" type="number" min="128" step="64" />
         </label>
+
+        <hr class="sysHR" />
+
+        <div class="meowdb-tools">
+          <button class="menu_button meowdb-tool-btn" :disabled="injecting" @click="injectSample">
+            {{ injecting ? '注入中...' : '注入示例数据' }}
+          </button>
+          <button class="menu_button meowdb-tool-btn danger" :disabled="clearing" @click="clearAll">
+            {{ clearing ? '清空中...' : '清空当前聊天数据' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { sampleEntry } from '@/data/sample-entry';
+import { clearAllEntries, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import { storeToRefs } from 'pinia';
 
 const { settings } = storeToRefs(useSettingsStore());
+const injecting = ref(false);
+const clearing = ref(false);
+
+async function injectSample() {
+  if (injecting.value) return;
+  injecting.value = true;
+
+  const ok = await saveCurrentEntry(sampleEntry);
+  injecting.value = false;
+
+  if (!ok) {
+    toastr.error('示例数据注入失败');
+    return;
+  }
+
+  toastr.success('示例数据已注入');
+}
+
+async function clearAll() {
+  if (clearing.value) return;
+  clearing.value = true;
+
+  const cleared = await clearAllEntries();
+  clearing.value = false;
+
+  toastr.success(cleared > 0 ? `已清空 ${cleared} 条 MeowDB 数据` : '当前聊天没有可清空的 MeowDB 数据');
+}
 </script>
