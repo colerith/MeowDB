@@ -1,20 +1,63 @@
 ﻿#MeowDB_drawer .drawer-content {
-  width: min(360px, 85vw);
+  width: min(380px, 88vw);
 }
 
 #MeowDB_drawer_content {
   padding: 10px;
 }
 
-.meowdb-settings-shell {
+.meowdb-drawer-body {
   display: grid;
   gap: 10px;
 }
 
-.meowdb-settings-shell h3 {
-  margin: 0;
-  font-size: 15px;
+.meowdb-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 700;
+}
+
+.meowdb-version {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.meowdb-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.meowdb-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--SmartThemeBorderColor);
+  background: color-mix(in srgb, var(--black50a) 50%, transparent 50%);
+  color: inherit;
+}
+
+.meowdb-tab-btn.active {
+  border-color: var(--SmartThemeQuoteColor);
+}
+
+.meowdb-tab-btn:disabled {
+  opacity: 0.55;
+}
+
+.meowdb-tab-contents {
+  border: 1px solid var(--SmartThemeBorderColor);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.meowdb-tab-content {
+  display: grid;
+  gap: 10px;
 }
 
 .meowdb-setting-row {
