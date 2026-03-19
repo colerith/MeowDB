@@ -541,3 +541,208 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- MeowDB modal interaction polish ---- */
+.meowdb-modal-overlay {
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.meowdb-modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.meowdb-modal {
+  transform: translateY(10px) scale(0.985);
+  opacity: 0.96;
+  transition:
+    transform 200ms ease,
+    opacity 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.meowdb-modal-overlay.open .meowdb-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.5);
+}
+
+.meowdb-modal-close {
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.meowdb-modal-close:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent, #84a5ff) 45%, white 55%);
+}
+
+.meowdb-tabs-modal {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 2px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg1, #181c27) 82%, black 18%);
+}
+
+.meowdb-tab-btn {
+  transition:
+    transform 130ms ease,
+    border-color 130ms ease,
+    background 130ms ease;
+}
+
+.meowdb-tab-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.meowdb-modal-content-shell {
+  min-height: 360px;
+}
+
+.meowdb-setting-row-compact {
+  align-items: flex-start;
+}
+
+.meowdb-inline-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meowdb-inline-number small {
+  opacity: 0.72;
+}
+
+.meowdb-input--xs {
+  width: 110px;
+}
+
+.meowdb-setting-row input[type='number'] {
+  width: auto;
+}
+
+.meowdb-prompt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meowdb-prompt-head h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.meowdb-prompt-hint {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.76;
+  line-height: 1.45;
+}
+
+.meowdb-prompt-textarea {
+  min-height: 250px;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.meowdb-prompt-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+/* ---- relation detail interaction polish ---- */
+.meowdb-rel-link-item,
+.meowdb-rel-card,
+.meowdb-rel-detail {
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    background 170ms ease;
+}
+
+.meowdb-rel-link-item:hover,
+.meowdb-rel-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.26);
+}
+
+.meowdb-rel-card::after {
+  content: '查看详情';
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-size: 11px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.meowdb-rel-card:hover::after {
+  opacity: 0.75;
+  transform: translateY(0);
+}
+
+.meowdb-rel-detail {
+  max-height: min(82vh, 760px);
+  overflow: auto;
+}
+
+.meowdb-rel-detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.meowdb-rel-detail-nav .menu_button {
+  min-height: 30px;
+}
+
+.meowdb-rel-detail-nav span {
+  font-size: 12px;
+  opacity: 0.76;
+}
+
+@media (max-width: 820px) {
+  .meowdb-modal-content-shell {
+    min-height: 0;
+  }
+
+  .meowdb-prompt-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meowdb-rel-detail-nav {
+    flex-wrap: wrap;
+  }
+}
+
+.meowdb-rel-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.meowdb-setting-row-compact input[type='number'] {
+  appearance: textfield;
+}
+
+.meowdb-setting-row-compact input[type='number']::-webkit-outer-spin-button,
+.meowdb-setting-row-compact input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+}

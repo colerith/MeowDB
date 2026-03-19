@@ -11,6 +11,8 @@ export const Settings = z
     api_model: z.string().default(''),
     api_temperature: z.number().min(0).max(2).default(0.7),
     api_max_tokens: z.number().int().positive().default(1200),
+
+    relations_prompt: z.string().default(''),
   })
   .prefault({});
 

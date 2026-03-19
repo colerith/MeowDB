@@ -102,11 +102,30 @@
 
     <Transition name="meowdb-slide">
       <aside v-if="selectedRelation" class="meowdb-rel-detail-mask" @click.self="selectedRelation = null">
-        <article class="meowdb-rel-detail">
+        <article
+          class="meowdb-rel-detail"
+          @keydown.left.prevent="selectPrev"
+          @keydown.right.prevent="selectNext"
+          tabindex="0"
+        >
           <button class="meowdb-rel-detail-close" type="button" @click="selectedRelation = null">
             <i class="fa-solid fa-xmark"></i>
           </button>
           <h3>{{ selectedRelation.name }}</h3>
+
+          <div class="meowdb-rel-detail-nav">
+            <button class="menu_button" type="button" :disabled="selectedIndex <= 0" @click="selectPrev">上一位</button>
+            <span>{{ selectedIndex + 1 }} / {{ relations.length }}</span>
+            <button
+              class="menu_button"
+              type="button"
+              :disabled="selectedIndex >= relations.length - 1"
+              @click="selectNext"
+            >
+              下一位
+            </button>
+          </div>
+
           <div class="meowdb-rel-detail-grid">
             <div>
               <b>性别</b>
@@ -171,6 +190,11 @@ const selectedRelation = ref<CharacterRelation | null>(null);
 
 const relations = computed(() => entry.value?.relations ?? []);
 
+const selectedIndex = computed(() => {
+  if (!selectedRelation.value) return -1;
+  return relations.value.findIndex(item => item.name === selectedRelation.value?.name);
+});
+
 const coreRelation = computed(() => {
   const list = relations.value;
   if (!list.length) return null;
@@ -212,6 +236,16 @@ function refresh() {
 
 function openRelationDetail(relation: CharacterRelation) {
   selectedRelation.value = relation;
+}
+
+function selectPrev() {
+  if (selectedIndex.value <= 0) return;
+  selectedRelation.value = relations.value[selectedIndex.value - 1] ?? null;
+}
+
+function selectNext() {
+  if (selectedIndex.value < 0 || selectedIndex.value >= relations.value.length - 1) return;
+  selectedRelation.value = relations.value[selectedIndex.value + 1] ?? null;
 }
 
 async function manualUpdate() {

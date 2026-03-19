@@ -17,7 +17,7 @@ export async function runManualAiUpdate(): Promise<ManualUpdateResult> {
   const settings = readSettings();
   const currentEntry = getCurrentEntry() ?? createDefaultEntry();
   const chatHistory = buildChatHistory();
-  const prompt = buildPrompt(currentEntry, chatHistory);
+  const prompt = buildPrompt(currentEntry, chatHistory, { relationsPrompt: settings.relations_prompt });
 
   try {
     const raw = await callApi(prompt, settings);
