@@ -1,4 +1,8 @@
-﻿.meowdb-modal-overlay {
+﻿.meowdb-dummy-drawer {
+  display: none !important;
+}
+
+.meowdb-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 4200;
