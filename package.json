@@ -1,5 +1,5 @@
 {
-  "name": "<插件名称>",
+  "name": "喵喵表格",
   "version": "1.0.0",
   "scripts": {
     "build": "vite build",
