@@ -14,19 +14,16 @@ export const ClothingPartsSchema = z.object({
 });
 
 export const AppearancePartsSchema = z.object({
-  head: z.string().default(''),
-  accessory: z.string().default(''),
-  face: z.string().default(''),
-  upperBody: z.string().default(''),
-  lowerBody: z.string().default(''),
-  innerDetail: z.string().default(''),
-  skinState: z.string().default(''),
-  footDetail: z.string().default(''),
+  hairColor: z.string().default(''),
+  eyeColor: z.string().default(''),
+  height: z.string().default(''),
+  bodyType: z.string().default(''),
 });
 
 export const CharacterRelationSchema = z.object({
   name: z.string().trim().min(1),
   gender: z.string().default(''),
+  birthday: z.string().default(''),
   genitalStatus: z.string().default(''),
   identity: z.string().default(''),
   personality: z.string().default(''),

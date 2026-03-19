@@ -1,228 +1,228 @@
 ﻿<template>
-  <section class="meowdb-visual-shell">
+  <section class="meowdb-visual-shell" :class="{ 'is-collapsed': panelCollapsed }">
     <header class="meowdb-visual-header">
       <div class="meowdb-title-group">
         <h3>MeowDB 喵喵表格</h3>
-        <span class="meowdb-version">Live</span>
+        <span class="meowdb-serial-badge">{{ entry?.serial || '未编号' }}</span>
       </div>
       <div class="meowdb-header-actions">
         <button class="menu_button meowdb-refresh" :disabled="updating" @click="refresh">刷新</button>
         <button class="menu_button meowdb-refresh" :disabled="updating" @click="manualUpdate">
           {{ updating ? '更新中...' : 'AI更新' }}
         </button>
+        <button class="menu_button meowdb-refresh" @click="toggleCollapse">
+          {{ panelCollapsed ? '展开' : '折叠' }}
+        </button>
       </div>
     </header>
 
-    <nav class="meowdb-tab-row">
-      <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'status' }" @click="activeTab = 'status'">
-        状态
-      </button>
-      <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'relations' }" @click="activeTab = 'relations'">
-        关系
-      </button>
-      <button class="meowdb-tab" disabled>时间线</button>
-      <button class="meowdb-tab" disabled>物品</button>
-      <button class="meowdb-tab" disabled>场景</button>
-      <button class="meowdb-tab" disabled>设置</button>
-    </nav>
+    <template v-if="!panelCollapsed">
+      <nav class="meowdb-tab-row">
+        <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'status' }" @click="activeTab = 'status'">
+          状态
+        </button>
+        <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'relations' }" @click="activeTab = 'relations'">
+          关系
+        </button>
+        <button class="meowdb-tab" disabled>时间线</button>
+        <button class="meowdb-tab" disabled>物品</button>
+        <button class="meowdb-tab" disabled>场景</button>
+        <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'settings' }" @click="activeTab = 'settings'">
+          设置
+        </button>
+      </nav>
 
-    <Transition name="meowdb-fade" mode="out-in">
-      <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
-        <div class="meowdb-card-grid">
-          <article class="meowdb-card">
-            <h4><strong>当前时间</strong></h4>
-            <p>{{ entry?.time || '未设置' }}</p>
-          </article>
-          <article class="meowdb-card">
-            <h4><strong>当前地点</strong></h4>
-            <p>{{ sceneText }}</p>
-          </article>
-          <article class="meowdb-card">
-            <h4><strong>当前事件</strong></h4>
-            <p>{{ entry?.scene?.topic || '暂无事件' }}</p>
-          </article>
-          <article class="meowdb-card">
-            <h4>
-              <strong>剧情摘要（{{ entry?.serial || '未编号' }}）</strong>
-            </h4>
-            <p>{{ entry?.plot || '暂无摘要' }}</p>
-          </article>
-          <article class="meowdb-card">
-            <h4><strong>NSFW 进度</strong></h4>
-            <p>{{ nsfwText }}</p>
-          </article>
+      <Transition name="meowdb-fade" mode="out-in">
+        <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
+          <div class="meowdb-card-grid">
+            <article class="meowdb-card">
+              <h4><strong>当前时间</strong></h4>
+              <p>{{ entry?.time || '未设置' }}</p>
+            </article>
+            <article class="meowdb-card">
+              <h4><strong>当前地点</strong></h4>
+              <p>{{ sceneText }}</p>
+            </article>
+            <article class="meowdb-card">
+              <h4><strong>剧情摘要</strong></h4>
+              <p>{{ entry?.plot || '暂无摘要' }}</p>
+            </article>
+            <article class="meowdb-card">
+              <h4><strong>NSFW 进度</strong></h4>
+              <p>{{ nsfwText }}</p>
+            </article>
+          </div>
+          <div class="meowdb-watermark">MeowDB Story Snapshot</div>
         </div>
-      </div>
 
-      <div v-else key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
-        <section class="meowdb-rel-cards">
-          <article
-            v-for="relation in relations"
-            :key="relation.name"
-            class="meowdb-rel-card"
-            @click="openRelationDetail(relation)"
-          >
-            <header class="meowdb-rel-card-head">
-              <div class="meowdb-rel-name">{{ relation.name }}</div>
-              <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
-            </header>
-            <div class="meowdb-rel-line">⌾ {{ relation.genitalStatus || '未记录' }}</div>
-            <div class="meowdb-rel-line">
-              🏷️ {{ relation.identity || '身份未知' }} · {{ relation.personality || '人格未知' }}
-            </div>
-            <div class="meowdb-rel-line">
-              📍 {{ relation.coordinate || '位置未知' }} · ⚡ {{ relation.action || '动作未知' }}
-            </div>
-            <div class="meowdb-rel-line">👗 {{ relation.clothing || summarizeClothing(relation) }}</div>
-            <div class="meowdb-rel-line">👤 {{ relation.appearance || summarizeAppearance(relation) }}</div>
-            <footer class="meowdb-rel-card-foot">
-              <span>{{ relation.bond || '羁绊未定义' }}</span>
-              <strong class="meowdb-favor-block">
-                <span>{{ formatOne(getFavorBase(relation)) }}</span>
-                <span :class="deltaClass(getFavorDelta(relation))">{{ formatSigned(getFavorDelta(relation)) }}</span>
-                <span>= {{ formatOne(getFavor(relation)) }}</span>
-              </strong>
-            </footer>
-          </article>
-        </section>
-
-        <details class="meowdb-rel-graph-collapse">
-          <summary>
-            <i class="fa-solid fa-circle-nodes"></i>
-            关系图谱（点击展开）
-          </summary>
-          <div class="meowdb-rel-graph-shell">
-            <svg class="meowdb-rel-graph" viewBox="0 0 760 360" role="img" aria-label="关系图谱">
-              <g v-for="edge in graphEdges" :key="edge.id" class="meowdb-rel-graph-edge">
-                <line :x1="edge.from.x" :y1="edge.from.y" :x2="edge.to.x" :y2="edge.to.y" />
-                <text :x="edge.labelX" :y="edge.labelY">{{ edge.label }}</text>
-              </g>
-              <g
-                v-for="node in graphNodes"
-                :key="node.name"
-                class="meowdb-rel-graph-node"
-                @click="openRelationByName(node.name)"
-              >
-                <circle :cx="node.x" :cy="node.y" :r="node.isCore ? 11 : 8" :fill="node.color" />
-                <text :x="node.x" :y="node.y + (node.isCore ? 24 : 21)">{{ node.name }}</text>
-              </g>
-            </svg>
-          </div>
-        </details>
-      </div>
-    </Transition>
-
-    <Transition name="meowdb-slide">
-      <aside v-if="selectedRelation" class="meowdb-rel-detail-mask" @click.self="selectedRelation = null">
-        <article
-          class="meowdb-rel-detail"
-          @keydown.left.prevent="selectPrev"
-          @keydown.right.prevent="selectNext"
-          tabindex="0"
-        >
-          <button class="meowdb-rel-detail-close" type="button" @click="selectedRelation = null">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-          <h3>{{ selectedRelation.name }}</h3>
-
-          <div class="meowdb-rel-detail-nav">
-            <button class="menu_button" type="button" :disabled="selectedIndex <= 0" @click="selectPrev">上一位</button>
-            <span>{{ selectedIndex + 1 }} / {{ relations.length }}</span>
-            <button
-              class="menu_button"
-              type="button"
-              :disabled="selectedIndex >= relations.length - 1"
-              @click="selectNext"
+        <div v-else-if="activeTab === 'relations'" key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
+          <section class="meowdb-rel-cards">
+            <article
+              v-for="relation in relations"
+              :key="relation.name"
+              class="meowdb-rel-card"
+              @click="openRelationDetail(relation)"
             >
-              下一位
-            </button>
+              <header class="meowdb-rel-card-head">
+                <div class="meowdb-rel-name">{{ relation.name }}</div>
+                <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
+              </header>
+              <div class="meowdb-rel-line">⌾ {{ relation.genitalStatus || '未记录' }}</div>
+              <div class="meowdb-rel-line">
+                🏷️ {{ relation.identity || '身份未知' }} · {{ relation.personality || '人格未知' }}
+              </div>
+              <div class="meowdb-rel-line">
+                📍 {{ relation.coordinate || '位置未知' }} · ⚡ {{ relation.action || '动作未知' }}
+              </div>
+              <div class="meowdb-rel-line">👗 {{ relation.clothing || summarizeClothing(relation) }}</div>
+              <div class="meowdb-rel-line">👤 {{ relation.appearance || summarizeAppearance(relation) }}</div>
+              <footer class="meowdb-rel-card-foot">
+                <span>{{ relation.bond || '羁绊未定义' }}</span>
+                <strong class="meowdb-favor-block">
+                  <span>{{ formatOne(getFavorBase(relation)) }}</span>
+                  <span :class="deltaClass(getFavorDelta(relation))">{{ formatSigned(getFavorDelta(relation)) }}</span>
+                  <span>= {{ formatOne(getFavor(relation)) }}</span>
+                </strong>
+              </footer>
+            </article>
+          </section>
+
+          <details class="meowdb-rel-graph-collapse">
+            <summary>
+              <i class="fa-solid fa-circle-nodes"></i>
+              关系图谱（点击展开）
+            </summary>
+            <div class="meowdb-rel-graph-shell">
+              <svg class="meowdb-rel-graph" viewBox="0 0 760 360" role="img" aria-label="关系图谱">
+                <g v-for="edge in graphEdges" :key="edge.id" class="meowdb-rel-graph-edge">
+                  <line :x1="edge.from.x" :y1="edge.from.y" :x2="edge.to.x" :y2="edge.to.y" />
+                  <text :x="edge.labelX" :y="edge.labelY">{{ edge.label }}</text>
+                </g>
+                <g
+                  v-for="node in graphNodes"
+                  :key="node.name"
+                  class="meowdb-rel-graph-node"
+                  @click="openRelationByName(node.name)"
+                >
+                  <circle :cx="node.x" :cy="node.y" :r="node.isCore ? 11 : 8" :fill="node.color" />
+                  <text :x="node.x" :y="node.y + (node.isCore ? 24 : 21)">{{ node.name }}</text>
+                </g>
+              </svg>
+            </div>
+          </details>
+        </div>
+
+        <div v-else key="settings" class="meowdb-tab-panel">
+          <div class="meowdb-palette-card">
+            <div class="meowdb-palette-head">
+              <b>关系图配色组（1组5色）</b>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="resetPalette">恢复默认</button>
+            </div>
+            <div class="meowdb-palette-grid">
+              <label v-for="(_, index) in paletteValues" :key="index" class="meowdb-palette-cell">
+                <span>颜色 {{ index + 1 }}</span>
+                <input type="color" v-model="paletteValues[index]" @change="applyPaletteColor(index)" />
+              </label>
+            </div>
           </div>
+        </div>
+      </Transition>
 
-          <section class="meowdb-rel-edit-section">
-            <h4>基础信息</h4>
-            <div class="meowdb-rel-edit-grid">
-              <div
-                v-for="field in coreFields"
-                :key="field.key"
-                class="meowdb-edit-cell"
-                :class="{ 'is-manual': isFieldManual(field.key) }"
+      <Transition name="meowdb-slide">
+        <aside v-if="selectedRelation" class="meowdb-rel-detail-mask" @click.self="selectedRelation = null">
+          <article
+            class="meowdb-rel-detail"
+            @keydown.left.prevent="selectPrev"
+            @keydown.right.prevent="selectNext"
+            tabindex="0"
+          >
+            <button class="meowdb-rel-detail-close" type="button" @click="selectedRelation = null">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3>{{ selectedRelation.name }}</h3>
+
+            <div class="meowdb-rel-detail-nav">
+              <button class="menu_button" type="button" :disabled="selectedIndex <= 0" @click="selectPrev">
+                上一位
+              </button>
+              <span>{{ selectedIndex + 1 }} / {{ relations.length }}</span>
+              <button
+                class="menu_button"
+                type="button"
+                :disabled="selectedIndex >= relations.length - 1"
+                @click="selectNext"
               >
-                <label>{{ field.label }}</label>
-                <input
-                  class="meowdb-input"
-                  :type="field.type || 'text'"
-                  v-model="draft[field.key]"
-                  @blur="applyField(field.key, field.type)"
-                />
-                <div class="meowdb-edit-actions">
-                  <button class="menu_button" type="button" @click="applyField(field.key, field.type)">保存</button>
-                  <button
-                    class="menu_button"
-                    type="button"
-                    :disabled="!canRestore(field.key)"
-                    @click="restoreField(field.key)"
-                  >
-                    还原
-                  </button>
+                下一位
+              </button>
+            </div>
+
+            <div class="meowdb-rel-bulk-actions">
+              <button
+                class="menu_button"
+                type="button"
+                :disabled="pendingChanges.length === 0"
+                @click="savePendingChanges"
+              >
+                保存修改（{{ pendingChanges.length }}）
+              </button>
+              <button
+                class="menu_button"
+                type="button"
+                :disabled="manualFields.length === 0"
+                @click="restoreAllManualFields"
+              >
+                还原手动字段（{{ manualFields.length }}）
+              </button>
+            </div>
+
+            <section class="meowdb-rel-edit-section">
+              <h4>基础信息</h4>
+              <div class="meowdb-rel-edit-grid">
+                <div
+                  v-for="field in coreFields"
+                  :key="field.key"
+                  class="meowdb-edit-cell"
+                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                >
+                  <label>{{ field.label }}</label>
+                  <input class="meowdb-input" :type="field.type || 'text'" v-model="draft[field.key]" />
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="meowdb-rel-edit-section">
-            <h4>服饰拆解</h4>
-            <div class="meowdb-rel-edit-grid">
-              <div
-                v-for="field in clothingFields"
-                :key="field.key"
-                class="meowdb-edit-cell"
-                :class="{ 'is-manual': isFieldManual(field.key) }"
-              >
-                <label>{{ field.label }}</label>
-                <input class="meowdb-input" v-model="draft[field.key]" @blur="applyField(field.key)" />
-                <div class="meowdb-edit-actions">
-                  <button class="menu_button" type="button" @click="applyField(field.key)">保存</button>
-                  <button
-                    class="menu_button"
-                    type="button"
-                    :disabled="!canRestore(field.key)"
-                    @click="restoreField(field.key)"
-                  >
-                    还原
-                  </button>
+            <section class="meowdb-rel-edit-section">
+              <h4>服饰拆解</h4>
+              <div class="meowdb-rel-edit-grid">
+                <div
+                  v-for="field in clothingFields"
+                  :key="field.key"
+                  class="meowdb-edit-cell"
+                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                >
+                  <label>{{ field.label }}</label>
+                  <input class="meowdb-input" v-model="draft[field.key]" />
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="meowdb-rel-edit-section">
-            <h4>外貌拆解</h4>
-            <div class="meowdb-rel-edit-grid">
-              <div
-                v-for="field in appearanceFields"
-                :key="field.key"
-                class="meowdb-edit-cell"
-                :class="{ 'is-manual': isFieldManual(field.key) }"
-              >
-                <label>{{ field.label }}</label>
-                <input class="meowdb-input" v-model="draft[field.key]" @blur="applyField(field.key)" />
-                <div class="meowdb-edit-actions">
-                  <button class="menu_button" type="button" @click="applyField(field.key)">保存</button>
-                  <button
-                    class="menu_button"
-                    type="button"
-                    :disabled="!canRestore(field.key)"
-                    @click="restoreField(field.key)"
-                  >
-                    还原
-                  </button>
+            <section class="meowdb-rel-edit-section">
+              <h4>外貌拆解</h4>
+              <div class="meowdb-rel-edit-grid">
+                <div
+                  v-for="field in appearanceFields"
+                  :key="field.key"
+                  class="meowdb-edit-cell"
+                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                >
+                  <label>{{ field.label }}</label>
+                  <input class="meowdb-input" v-model="draft[field.key]" />
                 </div>
               </div>
-            </div>
-          </section>
-        </article>
-      </aside>
-    </Transition>
+            </section>
+          </article>
+        </aside>
+      </Transition>
+    </template>
   </section>
 </template>
 
@@ -239,8 +239,11 @@ interface EditableField {
   type?: 'text' | 'number';
 }
 
+const defaultPalette = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
+
 const coreFields: EditableField[] = [
   { key: 'gender', label: '性别' },
+  { key: 'birthday', label: '生日' },
   { key: 'genitalStatus', label: '性器官及状态' },
   { key: 'identity', label: '身份' },
   { key: 'personality', label: '核心人格' },
@@ -267,22 +270,20 @@ const clothingFields: EditableField[] = [
 ];
 
 const appearanceFields: EditableField[] = [
-  { key: 'appearanceParts.head', label: '头部外貌' },
-  { key: 'appearanceParts.accessory', label: '配饰外貌' },
-  { key: 'appearanceParts.face', label: '面部外貌' },
-  { key: 'appearanceParts.upperBody', label: '上身外貌' },
-  { key: 'appearanceParts.lowerBody', label: '下身外貌' },
-  { key: 'appearanceParts.innerDetail', label: '内在细节' },
-  { key: 'appearanceParts.skinState', label: '肤态' },
-  { key: 'appearanceParts.footDetail', label: '足部外貌' },
+  { key: 'appearanceParts.hairColor', label: '发色' },
+  { key: 'appearanceParts.eyeColor', label: '瞳色' },
+  { key: 'appearanceParts.height', label: '身高' },
+  { key: 'appearanceParts.bodyType', label: '体型' },
 ];
 
 const { settings } = storeToRefs(useSettingsStore());
-const activeTab = ref<'status' | 'relations'>('status');
+const activeTab = ref<'status' | 'relations' | 'settings'>('status');
 const entry = ref(getCurrentEntry());
 const updating = ref(false);
 const selectedRelation = ref<CharacterRelation | null>(null);
 const draft = reactive<Record<string, string>>({});
+const panelCollapsed = ref(false);
+const paletteValues = ref<string[]>([...defaultPalette]);
 
 const relations = computed(() => entry.value?.relations ?? []);
 
@@ -295,17 +296,7 @@ const coreRelation = computed(() => {
   const list = relations.value;
   if (!list.length) return null;
 
-  return (
-    list.find(item => /<user>|\buser\b/i.test(item.name || '')) ??
-    list.find(item => /raven/i.test(item.name || '')) ??
-    list[0]
-  );
-});
-
-const otherRelations = computed(() => {
-  const core = coreRelation.value;
-  if (!core) return relations.value;
-  return relations.value.filter(item => item.name !== core.name);
+  return list.find(item => /<user>|\buser\b/i.test(item.name || '')) ?? list[0];
 });
 
 const graphNodes = computed(() => {
@@ -316,16 +307,7 @@ const graphNodes = computed(() => {
   const others = list.filter(item => item.name !== core.name);
   const center = { x: 380, y: 170 };
 
-  const nodes = [
-    {
-      name: core.name,
-      x: center.x,
-      y: center.y,
-      isCore: true,
-      color: '#7ee7cf',
-    },
-  ];
-
+  const nodes = [{ name: core.name, x: center.x, y: center.y, isCore: true, color: '#7ee7cf' }];
   const radiusX = 260;
   const radiusY = 130;
   others.forEach((item, index) => {
@@ -383,18 +365,52 @@ const nsfwText = computed(() => {
   return `${nsfw.current}/${nsfw.max}`;
 });
 
+const allFields = computed(() => [...coreFields, ...clothingFields, ...appearanceFields]);
+
+const pendingChanges = computed(() => {
+  if (!selectedRelation.value) return [] as string[];
+  return allFields.value
+    .filter(field => {
+      const oldValue = getByPath(selectedRelation.value as Record<string, any>, field.key);
+      const draftValue = coerceByType(draft[field.key], field.type);
+      return !Object.is(oldValue, draftValue);
+    })
+    .map(field => field.key);
+});
+
+const manualFields = computed(() => {
+  if (!selectedRelation.value) return [] as string[];
+  return Object.keys(selectedRelation.value.manualEdited ?? {}).filter(
+    key => selectedRelation.value?.manualEdited?.[key],
+  );
+});
+
+watch(
+  () => settings.value.relation_colors,
+  next => {
+    const list = Array.isArray(next) ? next.slice(0, 5) : [];
+    while (list.length < 5) list.push(defaultPalette[list.length]);
+    paletteValues.value = list;
+  },
+  { immediate: true, deep: true },
+);
+
 watch(
   selectedRelation,
   relation => {
     Object.keys(draft).forEach(key => delete draft[key]);
     if (!relation) return;
 
-    [...coreFields, ...clothingFields, ...appearanceFields].forEach(field => {
-      draft[field.key] = String(getByPath(relation, field.key) ?? '');
+    allFields.value.forEach(field => {
+      draft[field.key] = String(getByPath(relation as Record<string, any>, field.key) ?? '');
     });
   },
   { immediate: true },
 );
+
+function toggleCollapse() {
+  panelCollapsed.value = !panelCollapsed.value;
+}
 
 function pickColor(name: string): string {
   const palette = normalizePalette(settings.value.relation_colors);
@@ -407,9 +423,21 @@ function pickColor(name: string): string {
 }
 
 function normalizePalette(colors: string[] | undefined): string[] {
-  const fallback = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
-  if (!Array.isArray(colors) || colors.length < 5) return fallback;
-  return colors.slice(0, 5).map(color => (typeof color === 'string' && color.trim() ? color : fallback[0]));
+  if (!Array.isArray(colors) || colors.length < 5) return defaultPalette;
+  return colors
+    .slice(0, 5)
+    .map((color, idx) => (typeof color === 'string' && color.trim() ? color : defaultPalette[idx]));
+}
+
+function applyPaletteColor(index: number) {
+  const next = [...paletteValues.value];
+  while (next.length < 5) next.push(defaultPalette[next.length]);
+  settings.value.relation_colors = next.slice(0, 5);
+}
+
+function resetPalette() {
+  paletteValues.value = [...defaultPalette];
+  settings.value.relation_colors = [...defaultPalette];
 }
 
 function formatOne(value: number | undefined) {
@@ -451,7 +479,7 @@ function summarizeClothing(relation: CharacterRelation) {
 function summarizeAppearance(relation: CharacterRelation) {
   const parts = relation.appearanceParts;
   if (!parts) return '外貌未记录';
-  return [parts.head, parts.face, parts.skinState].filter(Boolean).join(' / ') || '外貌未记录';
+  return [parts.hairColor, parts.eyeColor, parts.height, parts.bodyType].filter(Boolean).join(' / ') || '外貌未记录';
 }
 
 function refresh() {
@@ -481,51 +509,57 @@ function isFieldManual(path: string) {
   return Boolean(selectedRelation.value?.manualEdited?.[path]);
 }
 
-function canRestore(path: string) {
-  const baseline = selectedRelation.value?.aiBaseline?.[path];
-  return baseline !== undefined;
+function isFieldPending(path: string) {
+  return pendingChanges.value.includes(path);
 }
 
-async function applyField(path: string, type: EditableField['type'] = 'text') {
-  if (!entry.value || !selectedRelation.value) return;
+function coerceByType(value: string, type: EditableField['type']) {
+  if (type !== 'number') return value ?? '';
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
 
+async function savePendingChanges() {
+  if (!entry.value || !selectedRelation.value) return;
   const index = selectedIndex.value;
   if (index < 0) return;
 
   const relation = entry.value.relations[index];
-  const oldValue = getByPath(relation, path);
-  const nextRaw = draft[path] ?? '';
-  const nextValue = type === 'number' ? Number(nextRaw) : nextRaw;
+  for (const key of pendingChanges.value) {
+    const field = allFields.value.find(item => item.key === key);
+    const oldValue = getByPath(relation as Record<string, any>, key);
+    const newValue = coerceByType(draft[key], field?.type);
 
-  if (Object.is(oldValue, nextValue)) return;
+    if (relation.aiBaseline[key] === undefined && (typeof oldValue === 'string' || typeof oldValue === 'number')) {
+      relation.aiBaseline[key] = oldValue;
+    }
 
-  if (relation.aiBaseline[path] === undefined && (typeof oldValue === 'string' || typeof oldValue === 'number')) {
-    relation.aiBaseline[path] = oldValue;
+    setByPath(relation as Record<string, any>, key, newValue);
+    relation.manualEdited[key] = true;
   }
 
-  setByPath(relation, path, nextValue);
-  relation.manualEdited[path] = true;
   normalizeFavorFields(relation);
-
   await persistEntry(relation.name);
 }
 
-async function restoreField(path: string) {
+async function restoreAllManualFields() {
   if (!entry.value || !selectedRelation.value) return;
-
   const index = selectedIndex.value;
   if (index < 0) return;
 
   const relation = entry.value.relations[index];
-  const baseline = relation.aiBaseline?.[path];
-  if (baseline === undefined) return;
+  for (const key of Object.keys(relation.manualEdited ?? {})) {
+    if (!relation.manualEdited[key]) continue;
+    const baseline = relation.aiBaseline?.[key];
+    if (baseline !== undefined) {
+      setByPath(relation as Record<string, any>, key, baseline);
+      draft[key] = String(baseline);
+    }
+    delete relation.manualEdited[key];
+    delete relation.aiBaseline[key];
+  }
 
-  setByPath(relation, path, baseline);
-  delete relation.manualEdited[path];
-  delete relation.aiBaseline[path];
-  draft[path] = String(baseline);
   normalizeFavorFields(relation);
-
   await persistEntry(relation.name);
 }
 
@@ -538,8 +572,7 @@ function normalizeFavorFields(relation: CharacterRelation) {
 }
 
 function getByPath(target: Record<string, any>, path: string) {
-  const keys = path.split('.');
-  return keys.reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), target);
+  return path.split('.').reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), target);
 }
 
 function setByPath(target: Record<string, any>, path: string, value: unknown) {
@@ -549,18 +582,14 @@ function setByPath(target: Record<string, any>, path: string, value: unknown) {
 
   let cursor: Record<string, any> = target;
   for (const key of keys) {
-    if (cursor[key] == null || typeof cursor[key] !== 'object') {
-      cursor[key] = {};
-    }
+    if (cursor[key] == null || typeof cursor[key] !== 'object') cursor[key] = {};
     cursor = cursor[key];
   }
-
   cursor[last] = value;
 }
 
 async function persistEntry(activeName?: string) {
   if (!entry.value) return;
-
   const ok = await saveCurrentEntry(entry.value);
   if (!ok) {
     toastr.error('保存失败，字段值不合法');

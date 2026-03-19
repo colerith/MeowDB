@@ -57,19 +57,6 @@
             </div>
           </label>
 
-          <div class="meowdb-palette-card">
-            <div class="meowdb-palette-head">
-              <b>关系图配色组（1组5色）</b>
-              <button class="menu_button meowdb-tool-btn" type="button" @click="resetPalette">恢复默认</button>
-            </div>
-            <div class="meowdb-palette-grid">
-              <label v-for="(_, index) in paletteValues" :key="index" class="meowdb-palette-cell">
-                <span>颜色 {{ index + 1 }}</span>
-                <input type="color" v-model="paletteValues[index]" @change="applyPaletteColor(index)" />
-              </label>
-            </div>
-          </div>
-
           <hr class="sysHR" />
 
           <label class="meowdb-setting-row">
@@ -133,14 +120,24 @@
             <button class="menu_button meowdb-tool-btn" type="button" @click="restoreRelationsPrompt">还原默认</button>
           </div>
 
-          <p class="meowdb-prompt-hint">relations 提示词已支持服饰/外貌拆解与手动编辑字段保护（manualEdited）。</p>
+          <p class="meowdb-prompt-hint">下方展示原始默认提示词与当前生效提示词（可编辑）。</p>
 
           <label class="meowdb-setting-row meowdb-setting-stack">
-            <span>relations 提示词</span>
+            <span>原始默认提示词（只读）</span>
+            <textarea
+              class="meowdb-input meowdb-prompt-textarea"
+              :value="DEFAULT_RELATIONS_PROMPT"
+              rows="10"
+              readonly
+            />
+          </label>
+
+          <label class="meowdb-setting-row meowdb-setting-stack">
+            <span>当前生效提示词（可修改）</span>
             <textarea
               class="meowdb-input meowdb-prompt-textarea"
               v-model="settings.relations_prompt"
-              rows="15"
+              rows="14"
               placeholder="留空将使用默认 relations 提示词"
             />
           </label>
@@ -162,25 +159,10 @@ import { clearAllEntries, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import { storeToRefs } from 'pinia';
 
-const defaultPalette = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
-
 const { settings } = storeToRefs(useSettingsStore());
 const activeTab = ref<'settings' | 'prompts'>('settings');
 const injecting = ref(false);
 const clearing = ref(false);
-const paletteValues = ref<string[]>([...defaultPalette]);
-
-watch(
-  () => settings.value.relation_colors,
-  next => {
-    const list = Array.isArray(next) ? next.slice(0, 5) : [];
-    while (list.length < 5) {
-      list.push(defaultPalette[list.length]);
-    }
-    paletteValues.value = list;
-  },
-  { immediate: true, deep: true },
-);
 
 async function injectSample() {
   if (injecting.value) return;
@@ -210,19 +192,5 @@ async function clearAll() {
 function restoreRelationsPrompt() {
   settings.value.relations_prompt = DEFAULT_RELATIONS_PROMPT;
   toastr.success('已还原默认 relations 提示词');
-}
-
-function applyPaletteColor(index: number) {
-  const next = [...paletteValues.value];
-  while (next.length < 5) {
-    next.push(defaultPalette[next.length]);
-  }
-  settings.value.relation_colors = next.slice(0, 5);
-}
-
-function resetPalette() {
-  paletteValues.value = [...defaultPalette];
-  settings.value.relation_colors = [...defaultPalette];
-  toastr.success('关系图配色已恢复默认');
 }
 </script>
