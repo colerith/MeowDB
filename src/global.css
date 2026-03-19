@@ -746,3 +746,163 @@
 .meowdb-setting-row-compact input[type='number']::-webkit-inner-spin-button {
   margin: 0;
 }
+
+/* ---- relation and editor enhancements ---- */
+.meowdb-favor-block {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.meowdb-favor-block .is-up {
+  color: #39d98a;
+}
+
+.meowdb-favor-block .is-down {
+  color: #ff6b6b;
+}
+
+.meowdb-favor-block .is-flat {
+  color: var(--SmartThemeBodyColor);
+  opacity: 0.7;
+}
+
+.meowdb-rel-graph-collapse {
+  border: 1px solid color-mix(in srgb, var(--border-color, #2f3544) 74%, white 26%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg2, #202531) 82%, black 18%);
+}
+
+.meowdb-rel-graph-collapse > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meowdb-rel-graph-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.meowdb-rel-graph-shell {
+  padding: 0 8px 10px;
+}
+
+.meowdb-rel-graph {
+  width: 100%;
+  min-height: 320px;
+  border-radius: 10px;
+  background: radial-gradient(160% 140% at 0% 0%, rgba(113, 99, 173, 0.34), transparent 60%), #2a2640;
+}
+
+.meowdb-rel-graph-edge line {
+  stroke: rgba(146, 171, 214, 0.62);
+  stroke-width: 1.2;
+}
+
+.meowdb-rel-graph-edge text {
+  fill: #b8c6e6;
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.meowdb-rel-graph-node {
+  cursor: pointer;
+}
+
+.meowdb-rel-graph-node text {
+  fill: #d5def3;
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.meowdb-rel-edit-section {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.meowdb-rel-edit-section h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.meowdb-rel-edit-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.meowdb-edit-cell {
+  border: 1px solid color-mix(in srgb, var(--border-color, #2f3544) 74%, white 26%);
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  background: color-mix(in srgb, var(--bg2, #202531) 82%, black 18%);
+}
+
+.meowdb-edit-cell.is-manual {
+  border-color: color-mix(in srgb, #5fd0ff 58%, var(--border-color, #2f3544) 42%);
+  box-shadow: inset 0 0 0 1px rgba(95, 208, 255, 0.2);
+}
+
+.meowdb-edit-cell label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meowdb-edit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.meowdb-palette-card {
+  border: 1px solid color-mix(in srgb, var(--SmartThemeBorderColor) 74%, white 26%);
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  background: color-mix(in srgb, var(--bg2, #1c2230) 76%, black 24%);
+}
+
+.meowdb-palette-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meowdb-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.meowdb-palette-cell {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.meowdb-palette-cell input[type='color'] {
+  width: 100%;
+  height: 30px;
+  border: 1px solid var(--SmartThemeBorderColor);
+  border-radius: 8px;
+  background: transparent;
+  padding: 2px;
+}
+
+@media (max-width: 820px) {
+  .meowdb-rel-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meowdb-palette-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

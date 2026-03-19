@@ -2,6 +2,28 @@
 
 export const NSFWDetailsSchema = z.record(z.string(), z.unknown()).default({});
 
+export const ClothingPartsSchema = z.object({
+  headwear: z.string().default(''),
+  jewelry: z.string().default(''),
+  facewear: z.string().default(''),
+  upper: z.string().default(''),
+  lower: z.string().default(''),
+  underwearTop: z.string().default(''),
+  underwearBottom: z.string().default(''),
+  shoesSocks: z.string().default(''),
+});
+
+export const AppearancePartsSchema = z.object({
+  head: z.string().default(''),
+  accessory: z.string().default(''),
+  face: z.string().default(''),
+  upperBody: z.string().default(''),
+  lowerBody: z.string().default(''),
+  innerDetail: z.string().default(''),
+  skinState: z.string().default(''),
+  footDetail: z.string().default(''),
+});
+
 export const CharacterRelationSchema = z.object({
   name: z.string().trim().min(1),
   gender: z.string().default(''),
@@ -11,10 +33,17 @@ export const CharacterRelationSchema = z.object({
   sexExp: z.string().default(''),
   coordinate: z.string().default(''),
   clothing: z.string().default(''),
+  clothingParts: ClothingPartsSchema.default({}),
+  appearance: z.string().default(''),
+  appearanceParts: AppearancePartsSchema.default({}),
   action: z.string().default(''),
   bond: z.string().default(''),
   favor: z.number().default(0),
+  favorBase: z.number().default(0),
+  favorDelta: z.number().default(0),
   favorChange: z.string().default(''),
+  manualEdited: z.record(z.string(), z.boolean()).default({}),
+  aiBaseline: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
 });
 
 export const EchoSchema = z.object({
@@ -65,6 +94,8 @@ export const MeowDBEntrySchema = z.object({
 });
 
 export type NSFWDetails = z.infer<typeof NSFWDetailsSchema>;
+export type ClothingParts = z.infer<typeof ClothingPartsSchema>;
+export type AppearanceParts = z.infer<typeof AppearancePartsSchema>;
 export type CharacterRelation = z.infer<typeof CharacterRelationSchema>;
 export type Echo = z.infer<typeof EchoSchema>;
 export type ArchivedNPC = z.infer<typeof ArchivedNPCSchema>;

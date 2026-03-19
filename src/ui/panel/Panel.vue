@@ -30,48 +30,31 @@
       <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
         <div class="meowdb-card-grid">
           <article class="meowdb-card">
-            <h4>当前时间</h4>
+            <h4><strong>当前时间</strong></h4>
             <p>{{ entry?.time || '未设置' }}</p>
           </article>
           <article class="meowdb-card">
-            <h4>当前地点</h4>
+            <h4><strong>当前地点</strong></h4>
             <p>{{ sceneText }}</p>
           </article>
           <article class="meowdb-card">
-            <h4>剧情摘要</h4>
+            <h4><strong>当前事件</strong></h4>
+            <p>{{ entry?.scene?.topic || '暂无事件' }}</p>
+          </article>
+          <article class="meowdb-card">
+            <h4>
+              <strong>剧情摘要（{{ entry?.serial || '未编号' }}）</strong>
+            </h4>
             <p>{{ entry?.plot || '暂无摘要' }}</p>
           </article>
           <article class="meowdb-card">
-            <h4>NSFW 进度</h4>
+            <h4><strong>NSFW 进度</strong></h4>
             <p>{{ nsfwText }}</p>
           </article>
         </div>
       </div>
 
       <div v-else key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
-        <section class="meowdb-rel-network">
-          <div class="meowdb-rel-network-title">关系网</div>
-          <div class="meowdb-rel-network-core">
-            <div class="meowdb-rel-node is-core">
-              <div class="meowdb-rel-node-name">{{ coreRelation?.name || '[user]' }}</div>
-              <div class="meowdb-rel-node-meta">核心视角</div>
-            </div>
-            <div class="meowdb-rel-links">
-              <button
-                v-for="person in otherRelations"
-                :key="person.name"
-                class="meowdb-rel-link-item"
-                type="button"
-                @click="openRelationDetail(person)"
-              >
-                <span class="meowdb-rel-link-name">{{ person.name }}</span>
-                <span class="meowdb-rel-link-bond">{{ person.bond || '未定义羁绊' }}</span>
-                <span class="meowdb-rel-link-favor">好感 {{ formatFavor(person.favor) }}</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
         <section class="meowdb-rel-cards">
           <article
             v-for="relation in relations"
@@ -90,13 +73,42 @@
             <div class="meowdb-rel-line">
               📍 {{ relation.coordinate || '位置未知' }} · ⚡ {{ relation.action || '动作未知' }}
             </div>
-            <div class="meowdb-rel-line">👗 {{ relation.clothing || '服饰未记录' }}</div>
+            <div class="meowdb-rel-line">👗 {{ relation.clothing || summarizeClothing(relation) }}</div>
+            <div class="meowdb-rel-line">👤 {{ relation.appearance || summarizeAppearance(relation) }}</div>
             <footer class="meowdb-rel-card-foot">
               <span>{{ relation.bond || '羁绊未定义' }}</span>
-              <strong>{{ formatFavor(relation.favor) }}</strong>
+              <strong class="meowdb-favor-block">
+                <span>{{ formatOne(getFavorBase(relation)) }}</span>
+                <span :class="deltaClass(getFavorDelta(relation))">{{ formatSigned(getFavorDelta(relation)) }}</span>
+                <span>= {{ formatOne(getFavor(relation)) }}</span>
+              </strong>
             </footer>
           </article>
         </section>
+
+        <details class="meowdb-rel-graph-collapse">
+          <summary>
+            <i class="fa-solid fa-circle-nodes"></i>
+            关系图谱（点击展开）
+          </summary>
+          <div class="meowdb-rel-graph-shell">
+            <svg class="meowdb-rel-graph" viewBox="0 0 760 360" role="img" aria-label="关系图谱">
+              <g v-for="edge in graphEdges" :key="edge.id" class="meowdb-rel-graph-edge">
+                <line :x1="edge.from.x" :y1="edge.from.y" :x2="edge.to.x" :y2="edge.to.y" />
+                <text :x="edge.labelX" :y="edge.labelY">{{ edge.label }}</text>
+              </g>
+              <g
+                v-for="node in graphNodes"
+                :key="node.name"
+                class="meowdb-rel-graph-node"
+                @click="openRelationByName(node.name)"
+              >
+                <circle :cx="node.x" :cy="node.y" :r="node.isCore ? 11 : 8" :fill="node.color" />
+                <text :x="node.x" :y="node.y + (node.isCore ? 24 : 21)">{{ node.name }}</text>
+              </g>
+            </svg>
+          </div>
+        </details>
       </div>
     </Transition>
 
@@ -126,52 +138,88 @@
             </button>
           </div>
 
-          <div class="meowdb-rel-detail-grid">
-            <div>
-              <b>性别</b>
-              <p>{{ selectedRelation.gender || '未知' }}</p>
+          <section class="meowdb-rel-edit-section">
+            <h4>基础信息</h4>
+            <div class="meowdb-rel-edit-grid">
+              <div
+                v-for="field in coreFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="{ 'is-manual': isFieldManual(field.key) }"
+              >
+                <label>{{ field.label }}</label>
+                <input
+                  class="meowdb-input"
+                  :type="field.type || 'text'"
+                  v-model="draft[field.key]"
+                  @blur="applyField(field.key, field.type)"
+                />
+                <div class="meowdb-edit-actions">
+                  <button class="menu_button" type="button" @click="applyField(field.key, field.type)">保存</button>
+                  <button
+                    class="menu_button"
+                    type="button"
+                    :disabled="!canRestore(field.key)"
+                    @click="restoreField(field.key)"
+                  >
+                    还原
+                  </button>
+                </div>
+              </div>
             </div>
-            <div>
-              <b>性器官及状态</b>
-              <p>{{ selectedRelation.genitalStatus || '未记录' }}</p>
+          </section>
+
+          <section class="meowdb-rel-edit-section">
+            <h4>服饰拆解</h4>
+            <div class="meowdb-rel-edit-grid">
+              <div
+                v-for="field in clothingFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="{ 'is-manual': isFieldManual(field.key) }"
+              >
+                <label>{{ field.label }}</label>
+                <input class="meowdb-input" v-model="draft[field.key]" @blur="applyField(field.key)" />
+                <div class="meowdb-edit-actions">
+                  <button class="menu_button" type="button" @click="applyField(field.key)">保存</button>
+                  <button
+                    class="menu_button"
+                    type="button"
+                    :disabled="!canRestore(field.key)"
+                    @click="restoreField(field.key)"
+                  >
+                    还原
+                  </button>
+                </div>
+              </div>
             </div>
-            <div>
-              <b>身份</b>
-              <p>{{ selectedRelation.identity || '未记录' }}</p>
+          </section>
+
+          <section class="meowdb-rel-edit-section">
+            <h4>外貌拆解</h4>
+            <div class="meowdb-rel-edit-grid">
+              <div
+                v-for="field in appearanceFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="{ 'is-manual': isFieldManual(field.key) }"
+              >
+                <label>{{ field.label }}</label>
+                <input class="meowdb-input" v-model="draft[field.key]" @blur="applyField(field.key)" />
+                <div class="meowdb-edit-actions">
+                  <button class="menu_button" type="button" @click="applyField(field.key)">保存</button>
+                  <button
+                    class="menu_button"
+                    type="button"
+                    :disabled="!canRestore(field.key)"
+                    @click="restoreField(field.key)"
+                  >
+                    还原
+                  </button>
+                </div>
+              </div>
             </div>
-            <div>
-              <b>核心人格</b>
-              <p>{{ selectedRelation.personality || '未记录' }}</p>
-            </div>
-            <div>
-              <b>性经验</b>
-              <p>{{ selectedRelation.sexExp || '未记录' }}</p>
-            </div>
-            <div>
-              <b>当前位置</b>
-              <p>{{ selectedRelation.coordinate || '未记录' }}</p>
-            </div>
-            <div>
-              <b>实时动作</b>
-              <p>{{ selectedRelation.action || '未记录' }}</p>
-            </div>
-            <div>
-              <b>全套服饰</b>
-              <p>{{ selectedRelation.clothing || '未记录' }}</p>
-            </div>
-            <div>
-              <b>当前羁绊</b>
-              <p>{{ selectedRelation.bond || '未记录' }}</p>
-            </div>
-            <div>
-              <b>好感值</b>
-              <p>{{ formatFavor(selectedRelation.favor) }}</p>
-            </div>
-            <div class="is-full">
-              <b>增幅原因</b>
-              <p>{{ selectedRelation.favorChange || '无' }}</p>
-            </div>
-          </div>
+          </section>
         </article>
       </aside>
     </Transition>
@@ -180,13 +228,61 @@
 
 <script setup lang="ts">
 import { runManualAiUpdate } from '@/modules/ai-updater';
-import { getCurrentEntry } from '@/modules/data-manager';
+import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
+import { useSettingsStore } from '@/store/settings';
 import type { CharacterRelation } from '@/type/meowdb';
+import { storeToRefs } from 'pinia';
 
+interface EditableField {
+  key: string;
+  label: string;
+  type?: 'text' | 'number';
+}
+
+const coreFields: EditableField[] = [
+  { key: 'gender', label: '性别' },
+  { key: 'genitalStatus', label: '性器官及状态' },
+  { key: 'identity', label: '身份' },
+  { key: 'personality', label: '核心人格' },
+  { key: 'sexExp', label: '性经验' },
+  { key: 'coordinate', label: '当前位置' },
+  { key: 'action', label: '实时动作' },
+  { key: 'bond', label: '当前羁绊' },
+  { key: 'favorBase', label: '好感基础值', type: 'number' },
+  { key: 'favorDelta', label: '好感增减值', type: 'number' },
+  { key: 'favorChange', label: '增减原因' },
+  { key: 'clothing', label: '服饰总览' },
+  { key: 'appearance', label: '外貌总览' },
+];
+
+const clothingFields: EditableField[] = [
+  { key: 'clothingParts.headwear', label: '头饰' },
+  { key: 'clothingParts.jewelry', label: '首饰' },
+  { key: 'clothingParts.facewear', label: '面饰' },
+  { key: 'clothingParts.upper', label: '上装' },
+  { key: 'clothingParts.lower', label: '下装' },
+  { key: 'clothingParts.underwearTop', label: '内衣' },
+  { key: 'clothingParts.underwearBottom', label: '内裤' },
+  { key: 'clothingParts.shoesSocks', label: '鞋袜' },
+];
+
+const appearanceFields: EditableField[] = [
+  { key: 'appearanceParts.head', label: '头部外貌' },
+  { key: 'appearanceParts.accessory', label: '配饰外貌' },
+  { key: 'appearanceParts.face', label: '面部外貌' },
+  { key: 'appearanceParts.upperBody', label: '上身外貌' },
+  { key: 'appearanceParts.lowerBody', label: '下身外貌' },
+  { key: 'appearanceParts.innerDetail', label: '内在细节' },
+  { key: 'appearanceParts.skinState', label: '肤态' },
+  { key: 'appearanceParts.footDetail', label: '足部外貌' },
+];
+
+const { settings } = storeToRefs(useSettingsStore());
 const activeTab = ref<'status' | 'relations'>('status');
 const entry = ref(getCurrentEntry());
 const updating = ref(false);
 const selectedRelation = ref<CharacterRelation | null>(null);
+const draft = reactive<Record<string, string>>({});
 
 const relations = computed(() => entry.value?.relations ?? []);
 
@@ -212,6 +308,69 @@ const otherRelations = computed(() => {
   return relations.value.filter(item => item.name !== core.name);
 });
 
+const graphNodes = computed(() => {
+  const list = relations.value;
+  if (!list.length) return [] as Array<{ name: string; x: number; y: number; isCore: boolean; color: string }>;
+
+  const core = coreRelation.value ?? list[0];
+  const others = list.filter(item => item.name !== core.name);
+  const center = { x: 380, y: 170 };
+
+  const nodes = [
+    {
+      name: core.name,
+      x: center.x,
+      y: center.y,
+      isCore: true,
+      color: '#7ee7cf',
+    },
+  ];
+
+  const radiusX = 260;
+  const radiusY = 130;
+  others.forEach((item, index) => {
+    const angle = (Math.PI * 2 * index) / Math.max(others.length, 1) - Math.PI / 2;
+    nodes.push({
+      name: item.name,
+      x: center.x + Math.cos(angle) * radiusX,
+      y: center.y + Math.sin(angle) * radiusY,
+      isCore: false,
+      color: pickColor(item.name),
+    });
+  });
+
+  return nodes;
+});
+
+const graphEdges = computed(() => {
+  const nodes = graphNodes.value;
+  const coreNode = nodes.find(node => node.isCore);
+  if (!coreNode)
+    return [] as Array<{
+      id: string;
+      from: { x: number; y: number };
+      to: { x: number; y: number };
+      label: string;
+      labelX: number;
+      labelY: number;
+    }>;
+
+  return nodes
+    .filter(node => !node.isCore)
+    .map(node => {
+      const relation = relations.value.find(item => item.name === node.name);
+      const label = relation?.bond || '关联';
+      return {
+        id: `${coreNode.name}->${node.name}`,
+        from: { x: coreNode.x, y: coreNode.y },
+        to: { x: node.x, y: node.y },
+        label,
+        labelX: (coreNode.x + node.x) / 2,
+        labelY: (coreNode.y + node.y) / 2,
+      };
+    });
+});
+
 const sceneText = computed(() => {
   const scene = entry.value?.scene;
   if (!scene) return '未设置';
@@ -224,10 +383,75 @@ const nsfwText = computed(() => {
   return `${nsfw.current}/${nsfw.max}`;
 });
 
-function formatFavor(value: number | undefined) {
+watch(
+  selectedRelation,
+  relation => {
+    Object.keys(draft).forEach(key => delete draft[key]);
+    if (!relation) return;
+
+    [...coreFields, ...clothingFields, ...appearanceFields].forEach(field => {
+      draft[field.key] = String(getByPath(relation, field.key) ?? '');
+    });
+  },
+  { immediate: true },
+);
+
+function pickColor(name: string): string {
+  const palette = normalizePalette(settings.value.relation_colors);
+  let hash = 0;
+  for (let i = 0; i < name.length; i += 1) {
+    hash = (hash << 5) - hash + name.charCodeAt(i);
+    hash |= 0;
+  }
+  return palette[Math.abs(hash) % palette.length];
+}
+
+function normalizePalette(colors: string[] | undefined): string[] {
+  const fallback = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
+  if (!Array.isArray(colors) || colors.length < 5) return fallback;
+  return colors.slice(0, 5).map(color => (typeof color === 'string' && color.trim() ? color : fallback[0]));
+}
+
+function formatOne(value: number | undefined) {
   if (typeof value !== 'number' || Number.isNaN(value)) return '0.0';
-  const fixed = value.toFixed(1);
-  return value > 0 ? `+${fixed}` : fixed;
+  return value.toFixed(1);
+}
+
+function formatSigned(value: number | undefined) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '+0.0';
+  return value >= 0 ? `+${value.toFixed(1)}` : value.toFixed(1);
+}
+
+function deltaClass(value: number | undefined) {
+  if (typeof value !== 'number' || Number.isNaN(value) || value === 0) return 'is-flat';
+  return value > 0 ? 'is-up' : 'is-down';
+}
+
+function getFavor(relation: CharacterRelation) {
+  return typeof relation.favor === 'number' ? relation.favor : getFavorBase(relation) + getFavorDelta(relation);
+}
+
+function getFavorBase(relation: CharacterRelation) {
+  if (typeof relation.favorBase === 'number') return relation.favorBase;
+  if (typeof relation.favor === 'number' && typeof relation.favorDelta === 'number')
+    return relation.favor - relation.favorDelta;
+  return typeof relation.favor === 'number' ? relation.favor : 0;
+}
+
+function getFavorDelta(relation: CharacterRelation) {
+  return typeof relation.favorDelta === 'number' ? relation.favorDelta : 0;
+}
+
+function summarizeClothing(relation: CharacterRelation) {
+  const parts = relation.clothingParts;
+  if (!parts) return '服饰未记录';
+  return [parts.upper, parts.lower, parts.shoesSocks].filter(Boolean).join(' / ') || '服饰未记录';
+}
+
+function summarizeAppearance(relation: CharacterRelation) {
+  const parts = relation.appearanceParts;
+  if (!parts) return '外貌未记录';
+  return [parts.head, parts.face, parts.skinState].filter(Boolean).join(' / ') || '外貌未记录';
 }
 
 function refresh() {
@@ -238,6 +462,11 @@ function openRelationDetail(relation: CharacterRelation) {
   selectedRelation.value = relation;
 }
 
+function openRelationByName(name: string) {
+  const relation = relations.value.find(item => item.name === name);
+  if (relation) openRelationDetail(relation);
+}
+
 function selectPrev() {
   if (selectedIndex.value <= 0) return;
   selectedRelation.value = relations.value[selectedIndex.value - 1] ?? null;
@@ -246,6 +475,102 @@ function selectPrev() {
 function selectNext() {
   if (selectedIndex.value < 0 || selectedIndex.value >= relations.value.length - 1) return;
   selectedRelation.value = relations.value[selectedIndex.value + 1] ?? null;
+}
+
+function isFieldManual(path: string) {
+  return Boolean(selectedRelation.value?.manualEdited?.[path]);
+}
+
+function canRestore(path: string) {
+  const baseline = selectedRelation.value?.aiBaseline?.[path];
+  return baseline !== undefined;
+}
+
+async function applyField(path: string, type: EditableField['type'] = 'text') {
+  if (!entry.value || !selectedRelation.value) return;
+
+  const index = selectedIndex.value;
+  if (index < 0) return;
+
+  const relation = entry.value.relations[index];
+  const oldValue = getByPath(relation, path);
+  const nextRaw = draft[path] ?? '';
+  const nextValue = type === 'number' ? Number(nextRaw) : nextRaw;
+
+  if (Object.is(oldValue, nextValue)) return;
+
+  if (relation.aiBaseline[path] === undefined && (typeof oldValue === 'string' || typeof oldValue === 'number')) {
+    relation.aiBaseline[path] = oldValue;
+  }
+
+  setByPath(relation, path, nextValue);
+  relation.manualEdited[path] = true;
+  normalizeFavorFields(relation);
+
+  await persistEntry(relation.name);
+}
+
+async function restoreField(path: string) {
+  if (!entry.value || !selectedRelation.value) return;
+
+  const index = selectedIndex.value;
+  if (index < 0) return;
+
+  const relation = entry.value.relations[index];
+  const baseline = relation.aiBaseline?.[path];
+  if (baseline === undefined) return;
+
+  setByPath(relation, path, baseline);
+  delete relation.manualEdited[path];
+  delete relation.aiBaseline[path];
+  draft[path] = String(baseline);
+  normalizeFavorFields(relation);
+
+  await persistEntry(relation.name);
+}
+
+function normalizeFavorFields(relation: CharacterRelation) {
+  const base = Number(relation.favorBase ?? 0);
+  const delta = Number(relation.favorDelta ?? 0);
+  relation.favorBase = Number.isFinite(base) ? Number(base.toFixed(1)) : 0;
+  relation.favorDelta = Number.isFinite(delta) ? Number(delta.toFixed(1)) : 0;
+  relation.favor = Number((relation.favorBase + relation.favorDelta).toFixed(1));
+}
+
+function getByPath(target: Record<string, any>, path: string) {
+  const keys = path.split('.');
+  return keys.reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), target);
+}
+
+function setByPath(target: Record<string, any>, path: string, value: unknown) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  if (!last) return;
+
+  let cursor: Record<string, any> = target;
+  for (const key of keys) {
+    if (cursor[key] == null || typeof cursor[key] !== 'object') {
+      cursor[key] = {};
+    }
+    cursor = cursor[key];
+  }
+
+  cursor[last] = value;
+}
+
+async function persistEntry(activeName?: string) {
+  if (!entry.value) return;
+
+  const ok = await saveCurrentEntry(entry.value);
+  if (!ok) {
+    toastr.error('保存失败，字段值不合法');
+    return;
+  }
+
+  refresh();
+  if (activeName) {
+    selectedRelation.value = relations.value.find(item => item.name === activeName) ?? null;
+  }
 }
 
 async function manualUpdate() {

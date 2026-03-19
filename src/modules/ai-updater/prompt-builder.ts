@@ -12,24 +12,32 @@ export const DEFAULT_RELATIONS_PROMPT = [
   '- sexExp: 性经验（对象(次数)）',
   '- coordinate: 当前位置',
   '- action: 当前动作',
-  '- clothing: 全套服饰（含内衣饰品）',
+  '- clothing: 全套服饰总览（简写）',
+  '- clothingParts: 服饰拆解对象，键必须齐全：headwear,jewelry,facewear,upper,lower,underwearTop,underwearBottom,shoesSocks',
+  '- appearance: 外貌总览（简写）',
+  '- appearanceParts: 外貌拆解对象，键必须齐全：head,accessory,face,upperBody,lowerBody,innerDetail,skinState,footDetail',
   '- genitalStatus: 性器官及状态',
   '- identity: 身份',
   '- personality: 核心人格',
   '- bond: 与对方当前羁绊描述',
-  '- favor: 好感值（number，保留1位小数）',
-  '- favorChange: 增幅原因（本轮关键事件）',
+  '- favorBase: 好感基础值（number，1位小数）',
+  '- favorDelta: 本轮增减值（number，1位小数，可正可负）',
+  '- favor: 最终值，等于 favorBase + favorDelta（number，1位小数）',
+  '- favorChange: 增减原因（本轮关键事件）',
+  '- manualEdited: object，保留已有 true 字段；没有手动改动可为空对象',
+  '- aiBaseline: object，保留已有基线值；不要覆盖已存在基线',
   '',
   'relation 卡片语义参考：',
   '◈ [名称] <[性别] ⌾ [性器官及状态]>',
   '├─ [身份] , [核心人格] , [性经验: 对象(次数)]',
-  '├─ [坐标] , [全套衣着(含内衣饰品)] , [实时动作]',
-  '└─ [羁绊 ⌾ 好感值(±0.0)，增幅原因: ...]',
+  '├─ [坐标] , [服饰拆解] , [外貌拆解] , [实时动作]',
+  '└─ [羁绊 ⌾ 基础值+增减值=最终值，增减原因: ...]',
   '',
   '[好感指南]',
   '1) 锚定前值，严禁无故跳涨；单次通常 +0.1~0.8',
   '2) 触犯禁忌/OOC/冲突时可强制扣分（-2~-10）',
   '3) 禁止把数值变化写成直白告白，用行为细节体现关系变化',
+  '4) 对手动字段（manualEdited=true）默认保持原值，除非剧情出现明确冲突证据',
 ].join('\n');
 
 interface BuildPromptOptions {
@@ -42,6 +50,7 @@ export function buildPrompt(
   options: BuildPromptOptions = {},
 ): PromptPayload {
   const relationsPrompt = options.relationsPrompt?.trim() || DEFAULT_RELATIONS_PROMPT;
+  const manualHints = buildManualHints(currentEntry);
 
   const system = [
     '你是 MeowDB 剧情数据库维护器。',
@@ -61,6 +70,9 @@ export function buildPrompt(
     '【当前数据】',
     JSON.stringify(currentEntry),
     '',
+    '【手动编辑保护】',
+    manualHints,
+    '',
     '【最近对话】',
     chatHistory || '(空)',
     '',
@@ -69,7 +81,22 @@ export function buildPrompt(
     '- time 反映当前轮次时间描述',
     '- 根据剧情更新 scene / plot / relations / echoes / enigmas / seeds',
     '- 优先保证 relations_json 字段完整、可直接用于前端卡片展示',
+    '- 对 manualEdited=true 的字段，默认保持值不变',
   ].join('\n');
 
   return { system, user };
+}
+
+function buildManualHints(entry: MeowDBEntry): string {
+  const lines: string[] = [];
+
+  for (const relation of entry.relations ?? []) {
+    const editedKeys = Object.keys(relation.manualEdited ?? {}).filter(key => relation.manualEdited?.[key]);
+    if (!editedKeys.length) continue;
+
+    const keyText = editedKeys.join(', ');
+    lines.push(`- ${relation.name}: 锁定字段 -> ${keyText}`);
+  }
+
+  return lines.length ? lines.join('\n') : '无手动锁定字段。';
 }
