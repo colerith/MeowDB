@@ -166,7 +166,11 @@
   font-size: 13px;
   color: var(--SmartThemeBodyColor);
   background: color-mix(in srgb, var(--bg2, #242937) 80%, black 20%);
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
 }
 
 .meowdb-tab:not(:disabled):hover {
@@ -270,7 +274,9 @@
   text-align: left;
   display: grid;
   gap: 4px;
-  transition: transform 140ms ease, border-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease;
 }
 
 .meowdb-rel-link-item:hover {
@@ -305,7 +311,10 @@
   cursor: pointer;
   display: grid;
   gap: 6px;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
   animation: meowdb-rise-in 280ms ease both;
 }
 

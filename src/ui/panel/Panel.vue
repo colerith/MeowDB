@@ -53,7 +53,7 @@
           <div class="meowdb-rel-network-title">关系网</div>
           <div class="meowdb-rel-network-core">
             <div class="meowdb-rel-node is-core">
-              <div class="meowdb-rel-node-name">{{ coreRelation?.name || '<user>' }}</div>
+              <div class="meowdb-rel-node-name">{{ coreRelation?.name || '[user]' }}</div>
               <div class="meowdb-rel-node-meta">核心视角</div>
             </div>
             <div class="meowdb-rel-links">
@@ -84,8 +84,12 @@
               <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
             </header>
             <div class="meowdb-rel-line">⌾ {{ relation.genitalStatus || '未记录' }}</div>
-            <div class="meowdb-rel-line">🏷️ {{ relation.identity || '身份未知' }} · {{ relation.personality || '人格未知' }}</div>
-            <div class="meowdb-rel-line">📍 {{ relation.coordinate || '位置未知' }} · ⚡ {{ relation.action || '动作未知' }}</div>
+            <div class="meowdb-rel-line">
+              🏷️ {{ relation.identity || '身份未知' }} · {{ relation.personality || '人格未知' }}
+            </div>
+            <div class="meowdb-rel-line">
+              📍 {{ relation.coordinate || '位置未知' }} · ⚡ {{ relation.action || '动作未知' }}
+            </div>
             <div class="meowdb-rel-line">👗 {{ relation.clothing || '服饰未记录' }}</div>
             <footer class="meowdb-rel-card-foot">
               <span>{{ relation.bond || '羁绊未定义' }}</span>
@@ -104,17 +108,50 @@
           </button>
           <h3>{{ selectedRelation.name }}</h3>
           <div class="meowdb-rel-detail-grid">
-            <div><b>性别</b><p>{{ selectedRelation.gender || '未知' }}</p></div>
-            <div><b>性器官及状态</b><p>{{ selectedRelation.genitalStatus || '未记录' }}</p></div>
-            <div><b>身份</b><p>{{ selectedRelation.identity || '未记录' }}</p></div>
-            <div><b>核心人格</b><p>{{ selectedRelation.personality || '未记录' }}</p></div>
-            <div><b>性经验</b><p>{{ selectedRelation.sexExp || '未记录' }}</p></div>
-            <div><b>当前位置</b><p>{{ selectedRelation.coordinate || '未记录' }}</p></div>
-            <div><b>实时动作</b><p>{{ selectedRelation.action || '未记录' }}</p></div>
-            <div><b>全套服饰</b><p>{{ selectedRelation.clothing || '未记录' }}</p></div>
-            <div><b>当前羁绊</b><p>{{ selectedRelation.bond || '未记录' }}</p></div>
-            <div><b>好感值</b><p>{{ formatFavor(selectedRelation.favor) }}</p></div>
-            <div class="is-full"><b>增幅原因</b><p>{{ selectedRelation.favorChange || '无' }}</p></div>
+            <div>
+              <b>性别</b>
+              <p>{{ selectedRelation.gender || '未知' }}</p>
+            </div>
+            <div>
+              <b>性器官及状态</b>
+              <p>{{ selectedRelation.genitalStatus || '未记录' }}</p>
+            </div>
+            <div>
+              <b>身份</b>
+              <p>{{ selectedRelation.identity || '未记录' }}</p>
+            </div>
+            <div>
+              <b>核心人格</b>
+              <p>{{ selectedRelation.personality || '未记录' }}</p>
+            </div>
+            <div>
+              <b>性经验</b>
+              <p>{{ selectedRelation.sexExp || '未记录' }}</p>
+            </div>
+            <div>
+              <b>当前位置</b>
+              <p>{{ selectedRelation.coordinate || '未记录' }}</p>
+            </div>
+            <div>
+              <b>实时动作</b>
+              <p>{{ selectedRelation.action || '未记录' }}</p>
+            </div>
+            <div>
+              <b>全套服饰</b>
+              <p>{{ selectedRelation.clothing || '未记录' }}</p>
+            </div>
+            <div>
+              <b>当前羁绊</b>
+              <p>{{ selectedRelation.bond || '未记录' }}</p>
+            </div>
+            <div>
+              <b>好感值</b>
+              <p>{{ formatFavor(selectedRelation.favor) }}</p>
+            </div>
+            <div class="is-full">
+              <b>增幅原因</b>
+              <p>{{ selectedRelation.favorChange || '无' }}</p>
+            </div>
           </div>
         </article>
       </aside>
