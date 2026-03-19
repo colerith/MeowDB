@@ -1,9 +1,17 @@
-﻿import type { MeowDBEntry } from '@/type/meowdb';
-import { loadLatestEntry, saveEntry } from '@/core/storage';
-import { validateEntry } from '@/modules/data-manager/validator';
+﻿import { loadLatestEntry, saveEntry } from '@/core/storage';
+import { migrateEntry } from '@/modules/data-manager/migrator';
+import { parseEntryObject, validateEntry } from '@/modules/data-manager/validator';
+import type { MeowDBEntry } from '@/type/meowdb';
 
 export function getCurrentEntry(): MeowDBEntry | null {
-  return loadLatestEntry();
+  const raw = loadLatestEntry();
+  if (!raw) return null;
+
+  try {
+    return migrateEntry(raw);
+  } catch {
+    return parseEntryObject(raw);
+  }
 }
 
 export async function saveCurrentEntry(entry: MeowDBEntry): Promise<boolean> {
@@ -11,3 +19,9 @@ export async function saveCurrentEntry(entry: MeowDBEntry): Promise<boolean> {
   await saveEntry(entry);
   return true;
 }
+
+export * from './migrator';
+export * from './validator';
+export * from './serializer';
+
+

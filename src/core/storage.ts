@@ -1,11 +1,11 @@
 ﻿import type { MeowDBEntry } from '@/type/meowdb';
 import { getStContext, saveChat } from '@/core/api-bridge';
 
-export function loadLatestEntry(): MeowDBEntry | null {
+export function loadLatestEntry(): unknown | null {
   const ctx = getStContext();
   const chat = (ctx?.chat ?? []) as any[];
   for (let i = chat.length - 1; i >= 0; i--) {
-    const entry = chat[i]?.data?.meowDB as MeowDBEntry | undefined;
+    const entry = chat[i]?.data?.meowDB;
     if (entry) return entry;
   }
   return null;

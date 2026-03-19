@@ -1,8 +1,11 @@
-﻿import type { MeowDBEntry } from '@/type/meowdb';
+﻿import { MeowDBEntrySchema, type MeowDBEntry } from '@/type/meowdb';
 
-export function validateEntry(entry: MeowDBEntry): boolean {
-  if (!entry) return false;
-  if (!entry.serial || !entry.time) return false;
-  if (!entry.scene || !entry.plot) return false;
-  return true;
+export function validateEntry(entry: unknown): entry is MeowDBEntry {
+  return MeowDBEntrySchema.safeParse(entry).success;
 }
+
+export function parseEntryObject(entry: unknown): MeowDBEntry | null {
+  const parsed = MeowDBEntrySchema.safeParse(entry);
+  return parsed.success ? parsed.data : null;
+}
+
