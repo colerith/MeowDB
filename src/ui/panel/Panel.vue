@@ -1,17 +1,25 @@
 ﻿<template>
   <section class="meowdb-visual-shell" :class="{ 'is-collapsed': panelCollapsed }">
     <header class="meowdb-visual-header">
-      <div class="meowdb-title-group">
+      <div
+        class="meowdb-title-group meowdb-title-toggle"
+        role="button"
+        tabindex="0"
+        @click="toggleCollapse"
+        @keydown.enter.prevent="toggleCollapse"
+        @keydown.space.prevent="toggleCollapse"
+      >
         <h3>MeowDB 喵喵表格</h3>
         <span class="meowdb-serial-badge">{{ entry?.serial || '未编号' }}</span>
       </div>
       <div class="meowdb-header-actions">
-        <button class="menu_button meowdb-refresh" :disabled="updating" @click="refresh">刷新</button>
-        <button class="menu_button meowdb-refresh" :disabled="updating" @click="manualUpdate">
-          {{ updating ? '更新中...' : 'AI更新' }}
+        <button class="menu_button meowdb-action-btn" :disabled="updating" @click="refresh">
+          <i class="fa-solid fa-rotate"></i>
+          <span>刷新</span>
         </button>
-        <button class="menu_button meowdb-refresh" @click="toggleCollapse">
-          {{ panelCollapsed ? '展开' : '折叠' }}
+        <button class="menu_button meowdb-action-btn meowdb-action-btn-ai" :disabled="updating" @click="manualUpdate">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>{{ updating ? '更新中...' : 'AI更新' }}</span>
         </button>
       </div>
     </header>
@@ -233,6 +241,8 @@ import { useSettingsStore } from '@/store/settings';
 import type { CharacterRelation } from '@/type/meowdb';
 import { storeToRefs } from 'pinia';
 
+type VisualTab = 'status' | 'relations' | 'settings';
+
 interface EditableField {
   key: string;
   label: string;
@@ -277,12 +287,13 @@ const appearanceFields: EditableField[] = [
 ];
 
 const { settings } = storeToRefs(useSettingsStore());
-const activeTab = ref<'status' | 'relations' | 'settings'>('status');
 const entry = ref(getCurrentEntry());
 const updating = ref(false);
 const selectedRelation = ref<CharacterRelation | null>(null);
 const draft = reactive<Record<string, string>>({});
-const panelCollapsed = ref(false);
+
+const activeTab = ref<VisualTab>(normalizeTab(settings.value.visual_active_tab));
+const panelCollapsed = ref(Boolean(settings.value.visual_panel_collapsed));
 const paletteValues = ref<string[]>([...defaultPalette]);
 
 const relations = computed(() => entry.value?.relations ?? []);
@@ -295,7 +306,6 @@ const selectedIndex = computed(() => {
 const coreRelation = computed(() => {
   const list = relations.value;
   if (!list.length) return null;
-
   return list.find(item => /<user>|\buser\b/i.test(item.name || '')) ?? list[0];
 });
 
@@ -310,6 +320,7 @@ const graphNodes = computed(() => {
   const nodes = [{ name: core.name, x: center.x, y: center.y, isCore: true, color: '#7ee7cf' }];
   const radiusX = 260;
   const radiusY = 130;
+
   others.forEach((item, index) => {
     const angle = (Math.PI * 2 * index) / Math.max(others.length, 1) - Math.PI / 2;
     nodes.push({
@@ -327,7 +338,7 @@ const graphNodes = computed(() => {
 const graphEdges = computed(() => {
   const nodes = graphNodes.value;
   const coreNode = nodes.find(node => node.isCore);
-  if (!coreNode)
+  if (!coreNode) {
     return [] as Array<{
       id: string;
       from: { x: number; y: number };
@@ -336,6 +347,7 @@ const graphEdges = computed(() => {
       labelX: number;
       labelY: number;
     }>;
+  }
 
   return nodes
     .filter(node => !node.isCore)
@@ -369,6 +381,7 @@ const allFields = computed(() => [...coreFields, ...clothingFields, ...appearanc
 
 const pendingChanges = computed(() => {
   if (!selectedRelation.value) return [] as string[];
+
   return allFields.value
     .filter(field => {
       const oldValue = getByPath(selectedRelation.value as Record<string, any>, field.key);
@@ -383,6 +396,14 @@ const manualFields = computed(() => {
   return Object.keys(selectedRelation.value.manualEdited ?? {}).filter(
     key => selectedRelation.value?.manualEdited?.[key],
   );
+});
+
+watch(activeTab, tab => {
+  settings.value.visual_active_tab = tab;
+});
+
+watch(panelCollapsed, collapsed => {
+  settings.value.visual_panel_collapsed = collapsed;
 });
 
 watch(
@@ -407,6 +428,11 @@ watch(
   },
   { immediate: true },
 );
+
+function normalizeTab(tab: string | undefined): VisualTab {
+  if (tab === 'relations' || tab === 'settings' || tab === 'status') return tab;
+  return 'status';
+}
 
 function toggleCollapse() {
   panelCollapsed.value = !panelCollapsed.value;

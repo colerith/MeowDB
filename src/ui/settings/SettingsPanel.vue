@@ -115,37 +115,29 @@
         </div>
 
         <div v-else key="prompts" class="meowdb-tab-content active">
-          <div class="meowdb-prompt-head">
-            <h4>数据更新提示词</h4>
-            <button class="menu_button meowdb-tool-btn" type="button" @click="restoreRelationsPrompt">还原默认</button>
-          </div>
+          <section class="meowdb-prompt-card">
+            <header class="meowdb-prompt-card-head">
+              <div>
+                <h4>Relations 更新提示词</h4>
+                <p>用于 AI 更新角色关系、服饰/外貌拆解和手动字段保护逻辑。</p>
+              </div>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="restoreRelationsPrompt">
+                恢复默认
+              </button>
+            </header>
 
-          <p class="meowdb-prompt-hint">下方展示原始默认提示词与当前生效提示词（可编辑）。</p>
-
-          <label class="meowdb-setting-row meowdb-setting-stack">
-            <span>原始默认提示词（只读）</span>
-            <textarea
-              class="meowdb-input meowdb-prompt-textarea"
-              :value="DEFAULT_RELATIONS_PROMPT"
-              rows="10"
-              readonly
-            />
-          </label>
-
-          <label class="meowdb-setting-row meowdb-setting-stack">
-            <span>当前生效提示词（可修改）</span>
             <textarea
               class="meowdb-input meowdb-prompt-textarea"
               v-model="settings.relations_prompt"
-              rows="14"
+              rows="18"
               placeholder="留空将使用默认 relations 提示词"
             />
-          </label>
 
-          <div class="meowdb-prompt-meta">
-            <span>字符数：{{ settings.relations_prompt?.length || 0 }}</span>
-            <span>留空 = 使用内置默认</span>
-          </div>
+            <div class="meowdb-prompt-meta">
+              <span>字符数：{{ settings.relations_prompt?.length || 0 }}</span>
+              <span>留空 = 使用内置默认</span>
+            </div>
+          </section>
         </div>
       </Transition>
     </div>

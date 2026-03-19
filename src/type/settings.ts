@@ -14,6 +14,9 @@ export const Settings = z
 
     relations_prompt: z.string().default(''),
     relation_colors: z.array(z.string()).length(5).default(['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd']),
+
+    visual_panel_collapsed: z.boolean().default(false),
+    visual_active_tab: z.enum(['status', 'relations', 'settings']).default('status'),
   })
   .prefault({});
 
