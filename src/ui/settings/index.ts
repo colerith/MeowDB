@@ -1,64 +1,74 @@
 ﻿import SettingsPanel from '@/ui/settings/SettingsPanel.vue';
 
-const SETTINGS_BTN_ID = 'meowdb-top-settings-btn';
-const SETTINGS_DRAWER_ID = 'meowdb-top-settings-drawer';
+const DRAWER_ID = 'MeowDB_drawer';
+const DRAWER_ICON_ID = 'MeowDB_drawer_icon';
+const DRAWER_CONTENT_ID = 'MeowDB_drawer_content';
 const SETTINGS_MOUNT_ID = 'meowdb-top-settings-mount';
 
 let app: ReturnType<typeof createApp> | null = null;
 
 export function initSettingsUI() {
-  const holder = document.querySelector('#top-settings-holder');
+  const holder = document.querySelector('#top-settings-holder') as HTMLElement | null;
   if (!holder) return;
 
-  const button = ensureSettingsButton(holder as HTMLElement);
-  const drawer = ensureDrawer(holder as HTMLElement);
-  mountSettingsApp(drawer);
+  const drawer = ensureDrawer(holder);
+  const icon = drawer.querySelector(`#${DRAWER_ICON_ID}`) as HTMLElement | null;
+  const content = drawer.querySelector(`#${DRAWER_CONTENT_ID}`) as HTMLElement | null;
+  if (!icon || !content) return;
 
-  button.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    drawer.classList.toggle('open');
-  });
+  mountSettingsApp(content);
 
-  document.addEventListener('click', event => {
-    if (!(event.target instanceof Node)) return;
-    if (button.contains(event.target) || drawer.contains(event.target)) return;
-    drawer.classList.remove('open');
-  });
-}
+  if (!icon.dataset.bound) {
+    icon.dataset.bound = 'true';
+    icon.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const willClose = !content.classList.contains('closedDrawer');
+      setDrawerState(content, icon, willClose);
+    });
+  }
 
-function ensureSettingsButton(holder: HTMLElement): HTMLButtonElement {
-  let button = holder.querySelector(`#${SETTINGS_BTN_ID}`) as HTMLButtonElement | null;
-  if (button) return button;
-
-  button = document.createElement('button');
-  button.id = SETTINGS_BTN_ID;
-  button.className = 'menu_button fa-solid fa-table-cells-large interactable meowdb-top-btn';
-  button.type = 'button';
-  button.title = 'MeowDB 设置';
-  holder.appendChild(button);
-  return button;
+  if (!drawer.dataset.boundOutside) {
+    drawer.dataset.boundOutside = 'true';
+    document.addEventListener('click', event => {
+      if (!(event.target instanceof Node)) return;
+      if (drawer.contains(event.target)) return;
+      setDrawerState(content, icon, true);
+    });
+  }
 }
 
 function ensureDrawer(holder: HTMLElement): HTMLElement {
-  let drawer = document.querySelector(`#${SETTINGS_DRAWER_ID}`) as HTMLElement | null;
+  let drawer = holder.querySelector(`#${DRAWER_ID}`) as HTMLElement | null;
   if (drawer) return drawer;
 
   drawer = document.createElement('div');
-  drawer.id = SETTINGS_DRAWER_ID;
-  drawer.className = 'drawer meowdb-settings-drawer';
-
-  const mount = document.createElement('div');
-  mount.id = SETTINGS_MOUNT_ID;
-  drawer.appendChild(mount);
+  drawer.id = DRAWER_ID;
+  drawer.className = 'drawer';
+  drawer.innerHTML = `
+    <div class="drawer-toggle">
+      <div id="${DRAWER_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
+    </div>
+    <div id="${DRAWER_CONTENT_ID}" class="drawer-content closedDrawer"></div>
+  `;
 
   holder.appendChild(drawer);
   return drawer;
 }
 
-function mountSettingsApp(drawer: HTMLElement) {
-  const mount = drawer.querySelector(`#${SETTINGS_MOUNT_ID}`) as HTMLElement | null;
-  if (!mount) return;
+function setDrawerState(content: HTMLElement, icon: HTMLElement, closed: boolean) {
+  content.classList.toggle('closedDrawer', closed);
+  icon.classList.toggle('closedIcon', closed);
+}
+
+function mountSettingsApp(content: HTMLElement) {
+  let mount = content.querySelector(`#${SETTINGS_MOUNT_ID}`) as HTMLElement | null;
+  if (!mount) {
+    mount = document.createElement('div');
+    mount.id = SETTINGS_MOUNT_ID;
+    content.appendChild(mount);
+  }
+
   if (mount.childElementCount > 0) return;
 
   if (!app) {

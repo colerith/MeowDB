@@ -1,33 +1,9 @@
-﻿.meowdb-top-btn {
-  min-width: 34px;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 6px;
-}
-
-.meowdb-settings-drawer.drawer {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  display: none;
+﻿#MeowDB_drawer .drawer-content {
   width: min(360px, 85vw);
-  padding: 12px;
-  border-radius: 12px;
-  z-index: 3500;
-  background: color-mix(in srgb, var(--bg1, #121212) 88%, black 12%);
-  border: 1px solid color-mix(in srgb, var(--border-color, #333) 70%, white 30%);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
 
-.meowdb-settings-drawer.open {
-  display: block;
-}
-
-#top-settings-holder {
-  position: relative;
+#MeowDB_drawer_content {
+  padding: 10px;
 }
 
 .meowdb-settings-shell {

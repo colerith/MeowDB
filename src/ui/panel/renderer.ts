@@ -4,14 +4,17 @@ let app: ReturnType<typeof createApp> | null = null;
 let mountedEl: Element | null = null;
 
 export function renderPanel(target: HTMLElement) {
-  if (mountedEl === target) return;
+  if (mountedEl === target && app) return;
 
-  if (!app) {
-    app = createApp(VisualPanel);
-    app.use(createPinia());
+  if (app) {
+    app.unmount();
+    app = null;
+    mountedEl = null;
   }
 
   target.innerHTML = '';
-  mountedEl = target;
+  app = createApp(VisualPanel);
+  app.use(createPinia());
   app.mount(target);
+  mountedEl = target;
 }
