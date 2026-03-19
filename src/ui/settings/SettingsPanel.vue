@@ -5,7 +5,7 @@
         <i class="fa-solid fa-table-cells-large"></i>
         MeowDB 喵喵表格
       </div>
-      <span class="meowdb-version">v0.1</span>
+      <span class="meowdb-version">v0.2</span>
     </div>
 
     <div class="meowdb-tabs">
@@ -36,6 +36,33 @@
         <label class="meowdb-setting-row">
           <span>自动更新间隔（回合）</span>
           <input v-model.number="settings.auto_update_interval" type="number" min="1" />
+        </label>
+
+        <hr class="sysHR" />
+
+        <label class="meowdb-setting-row">
+          <span>启用独立 API</span>
+          <input v-model="settings.api_enabled" type="checkbox" />
+        </label>
+        <label class="meowdb-setting-row meowdb-setting-stack">
+          <span>API URL</span>
+          <input v-model="settings.api_url" type="text" placeholder="https://api.openai.com/v1" />
+        </label>
+        <label class="meowdb-setting-row meowdb-setting-stack">
+          <span>API Key</span>
+          <input v-model="settings.api_key" type="password" placeholder="sk-..." />
+        </label>
+        <label class="meowdb-setting-row meowdb-setting-stack">
+          <span>Model</span>
+          <input v-model="settings.api_model" type="text" placeholder="gpt-4.1-mini" />
+        </label>
+        <label class="meowdb-setting-row">
+          <span>Temperature</span>
+          <input v-model.number="settings.api_temperature" type="number" min="0" max="2" step="0.1" />
+        </label>
+        <label class="meowdb-setting-row">
+          <span>Max Tokens</span>
+          <input v-model.number="settings.api_max_tokens" type="number" min="128" step="64" />
         </label>
       </div>
     </div>

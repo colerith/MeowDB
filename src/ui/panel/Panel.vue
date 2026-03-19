@@ -5,7 +5,12 @@
         <h3>MeowDB 喵喵表格</h3>
         <span class="meowdb-version">Live</span>
       </div>
-      <button class="menu_button meowdb-refresh" @click="refresh">刷新</button>
+      <div class="meowdb-header-actions">
+        <button class="menu_button meowdb-refresh" :disabled="updating" @click="refresh">刷新</button>
+        <button class="menu_button meowdb-refresh" :disabled="updating" @click="manualUpdate">
+          {{ updating ? '更新中...' : 'AI更新' }}
+        </button>
+      </div>
     </header>
 
     <nav class="meowdb-tab-row">
@@ -39,9 +44,11 @@
 </template>
 
 <script setup lang="ts">
+import { runManualAiUpdate } from '@/modules/ai-updater';
 import { getCurrentEntry } from '@/modules/data-manager';
 
 const entry = ref(getCurrentEntry());
+const updating = ref(false);
 
 const sceneText = computed(() => {
   const scene = entry.value?.scene;
@@ -57,5 +64,21 @@ const nsfwText = computed(() => {
 
 function refresh() {
   entry.value = getCurrentEntry();
+}
+
+async function manualUpdate() {
+  if (updating.value) return;
+  updating.value = true;
+
+  const result = await runManualAiUpdate();
+  updating.value = false;
+
+  if (!result.ok) {
+    toastr.error(result.error || 'AI 更新失败');
+    return;
+  }
+
+  refresh();
+  toastr.success('AI 更新完成');
 }
 </script>
