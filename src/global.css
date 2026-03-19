@@ -1,14 +1,48 @@
-﻿#MeowDB_drawer .drawer-content {
-  width: min(380px, 88vw);
+﻿.meowdb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 16, 0.55);
+  backdrop-filter: blur(3px);
 }
 
-#MeowDB_drawer_content {
-  padding: 10px;
+.meowdb-modal-overlay.open {
+  display: flex;
+}
+
+.meowdb-modal {
+  position: relative;
+  width: min(860px, calc(100vw - 36px));
+  max-height: min(84vh, 920px);
+  overflow: auto;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--SmartThemeBorderColor) 76%, white 24%);
+  background:
+    radial-gradient(120% 90% at 5% 0%, rgba(92, 132, 226, 0.25), transparent 52%),
+    color-mix(in srgb, var(--bg1, #151923) 90%, black 10%);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.42);
+}
+
+.meowdb-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--SmartThemeBorderColor);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--black50a) 55%, transparent 45%);
+  color: inherit;
 }
 
 .meowdb-drawer-body {
   display: grid;
   gap: 10px;
+  padding-top: 4px;
 }
 
 .meowdb-title {
@@ -107,11 +141,6 @@
   font-weight: 800;
 }
 
-.meowdb-version {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
 .meowdb-tab-row {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -163,6 +192,16 @@
 }
 
 @media (max-width: 820px) {
+  .meowdb-modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    padding: 12px;
+  }
+
+  .meowdb-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .meowdb-tab-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

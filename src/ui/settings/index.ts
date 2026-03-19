@@ -1,9 +1,9 @@
 ﻿import SettingsPanel from '@/ui/settings/SettingsPanel.vue';
 
-const DRAWER_ID = 'MeowDB_drawer';
-const DRAWER_ICON_ID = 'MeowDB_drawer_icon';
-const DRAWER_CONTENT_ID = 'MeowDB_drawer_content';
-const SETTINGS_MOUNT_ID = 'meowdb-top-settings-mount';
+const TOP_ENTRY_ID = 'MeowDB_top_entry';
+const TOP_ICON_ID = 'MeowDB_top_icon';
+const MODAL_OVERLAY_ID = 'MeowDB_settings_overlay';
+const MODAL_ROOT_ID = 'MeowDB_settings_root';
 
 let app: ReturnType<typeof createApp> | null = null;
 
@@ -11,54 +11,113 @@ export function initSettingsUI() {
   const holder = document.querySelector('#top-settings-holder') as HTMLElement | null;
   if (!holder) return;
 
-  const drawer = ensureDrawer(holder);
-  const content = drawer.querySelector(`#${DRAWER_CONTENT_ID}`) as HTMLElement | null;
-  if (!content) return;
+  const entry = ensureTopIconEntry(holder);
+  const icon = entry.querySelector(`#${TOP_ICON_ID}`) as HTMLElement | null;
+  if (!icon) return;
 
-  mountSettingsApp(content);
+  const overlay = ensureModalOverlay();
+  mountSettingsApp(overlay);
+  bindModalEvents(icon, overlay);
 }
 
-function ensureDrawer(holder: HTMLElement): HTMLElement {
-  let drawer = holder.querySelector(`#${DRAWER_ID}`) as HTMLElement | null;
+function ensureTopIconEntry(holder: HTMLElement): HTMLElement {
+  let entry = holder.querySelector(`#${TOP_ENTRY_ID}`) as HTMLElement | null;
 
-  if (!drawer) {
-    drawer = document.createElement('div');
-    drawer.id = DRAWER_ID;
-    drawer.className = 'drawer';
-    drawer.innerHTML = `
-      <div class="drawer-toggle">
-        <div id="${DRAWER_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
-      </div>
-      <div id="${DRAWER_CONTENT_ID}" class="drawer-content closedDrawer"></div>
-    `;
+  if (!entry) {
+    entry = document.createElement('div');
+    entry.id = TOP_ENTRY_ID;
+    entry.className = 'meowdb-top-entry';
+    entry.innerHTML = `<div id="${TOP_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>`;
   }
 
-  placeBeforeLastDrawerIcon(holder, drawer);
-  return drawer;
+  placeBeforeLastDrawer(holder, entry);
+  return entry;
 }
 
-function placeBeforeLastDrawerIcon(holder: HTMLElement, drawer: HTMLElement) {
+function placeBeforeLastDrawer(holder: HTMLElement, entry: HTMLElement) {
   const otherDrawers = Array.from(holder.children).filter(
-    (el): el is HTMLElement => el instanceof HTMLElement && el.classList.contains('drawer') && el.id !== DRAWER_ID,
+    (el): el is HTMLElement => el instanceof HTMLElement && el.classList.contains('drawer'),
   );
-  const lastDrawer = otherDrawers.at(-1);
 
+  const lastDrawer = otherDrawers.at(-1);
   if (lastDrawer) {
-    holder.insertBefore(drawer, lastDrawer);
+    holder.insertBefore(entry, lastDrawer);
     return;
   }
 
-  holder.appendChild(drawer);
+  holder.appendChild(entry);
 }
 
-function mountSettingsApp(content: HTMLElement) {
-  let mount = content.querySelector(`#${SETTINGS_MOUNT_ID}`) as HTMLElement | null;
-  if (!mount) {
-    mount = document.createElement('div');
-    mount.id = SETTINGS_MOUNT_ID;
-    content.appendChild(mount);
+function ensureModalOverlay(): HTMLElement {
+  let overlay = document.querySelector(`#${MODAL_OVERLAY_ID}`) as HTMLElement | null;
+  if (overlay) return overlay;
+
+  overlay = document.createElement('div');
+  overlay.id = MODAL_OVERLAY_ID;
+  overlay.className = 'meowdb-modal-overlay';
+  overlay.innerHTML = `
+    <div class="meowdb-modal" role="dialog" aria-modal="true" aria-label="MeowDB 设置">
+      <button type="button" class="meowdb-modal-close interactable" title="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="${MODAL_ROOT_ID}"></div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function bindModalEvents(icon: HTMLElement, overlay: HTMLElement) {
+  if (!icon.dataset.bound) {
+    icon.dataset.bound = 'true';
+    icon.addEventListener('click', () => openModal(overlay, icon));
+    icon.addEventListener('keydown', event => {
+      if (!(event instanceof KeyboardEvent)) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openModal(overlay, icon);
+    });
   }
 
+  if (!overlay.dataset.bound) {
+    overlay.dataset.bound = 'true';
+
+    overlay.addEventListener('click', event => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (target.classList.contains('meowdb-modal-overlay')) {
+        closeModal(overlay, icon);
+      }
+    });
+
+    const closeBtn = overlay.querySelector('.meowdb-modal-close') as HTMLElement | null;
+    closeBtn?.addEventListener('click', () => closeModal(overlay, icon));
+
+    document.addEventListener('keydown', event => {
+      if (!(event instanceof KeyboardEvent)) return;
+      if (event.key !== 'Escape') return;
+      if (!overlay.classList.contains('open')) return;
+      closeModal(overlay, icon);
+    });
+  }
+}
+
+function openModal(overlay: HTMLElement, icon: HTMLElement) {
+  overlay.classList.add('open');
+  icon.classList.remove('closedIcon');
+  icon.classList.add('openIcon');
+}
+
+function closeModal(overlay: HTMLElement, icon: HTMLElement) {
+  overlay.classList.remove('open');
+  icon.classList.remove('openIcon');
+  icon.classList.add('closedIcon');
+}
+
+function mountSettingsApp(_overlay: HTMLElement) {
+  const mount = document.querySelector(`#${MODAL_ROOT_ID}`) as HTMLElement | null;
+  if (!mount) return;
   if (mount.childElementCount > 0) return;
 
   if (!app) {
