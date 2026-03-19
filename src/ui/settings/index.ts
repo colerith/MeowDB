@@ -20,20 +20,35 @@ export function initSettingsUI() {
 
 function ensureDrawer(holder: HTMLElement): HTMLElement {
   let drawer = holder.querySelector(`#${DRAWER_ID}`) as HTMLElement | null;
-  if (drawer) return drawer;
 
-  drawer = document.createElement('div');
-  drawer.id = DRAWER_ID;
-  drawer.className = 'drawer';
-  drawer.innerHTML = `
-    <div class="drawer-toggle">
-      <div id="${DRAWER_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
-    </div>
-    <div id="${DRAWER_CONTENT_ID}" class="drawer-content closedDrawer"></div>
-  `;
+  if (!drawer) {
+    drawer = document.createElement('div');
+    drawer.id = DRAWER_ID;
+    drawer.className = 'drawer';
+    drawer.innerHTML = `
+      <div class="drawer-toggle">
+        <div id="${DRAWER_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
+      </div>
+      <div id="${DRAWER_CONTENT_ID}" class="drawer-content closedDrawer"></div>
+    `;
+  }
+
+  placeBeforeLastDrawerIcon(holder, drawer);
+  return drawer;
+}
+
+function placeBeforeLastDrawerIcon(holder: HTMLElement, drawer: HTMLElement) {
+  const otherDrawers = Array.from(holder.children).filter(
+    (el): el is HTMLElement => el instanceof HTMLElement && el.classList.contains('drawer') && el.id !== DRAWER_ID,
+  );
+  const lastDrawer = otherDrawers.at(-1);
+
+  if (lastDrawer) {
+    holder.insertBefore(drawer, lastDrawer);
+    return;
+  }
 
   holder.appendChild(drawer);
-  return drawer;
 }
 
 function mountSettingsApp(content: HTMLElement) {
