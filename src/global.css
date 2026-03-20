@@ -2701,3 +2701,46 @@
   gap: 8px;
   justify-content: flex-end;
 }
+
+/* modal checkbox icon refinement */
+.meowdb-modal .meowdb-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.meowdb-modal .meowdb-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: none;
+  transform: translate(-50%, -50%);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px 11px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.4L4.7 9 10 3.6' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* section title style upgrade */
+.meowdb-setting-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 820;
+  color: #253e69;
+  letter-spacing: 0.01em;
+}
+
+.meowdb-setting-title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #5f8de4, #4f79cb);
+  box-shadow: 0 0 0 1px rgba(130, 160, 214, 0.2);
+}

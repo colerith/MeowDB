@@ -108,18 +108,18 @@
             <Transition name="meowdb-fade">
               <div v-if="profileEditorOpen" class="meowdb-profile-editor" @keydown.enter.prevent="submitProfileEditor">
                 <label class="meowdb-setting-stack">
-                  <span>{{ profileEditorMode === 'create' ? '???????' : '?????' }}</span>
+                  <span>{{ profileEditorMode === 'create' ? '输入新方案名称' : '输入新名称' }}</span>
                   <input
                     ref="profileEditorInput"
                     class="meowdb-input"
                     v-model.trim="profileEditorName"
                     type="text"
-                    placeholder="???OpenRouter-???"
+                    placeholder="e.g. OpenRouter-cheap"
                   />
                 </label>
                 <div class="meowdb-profile-editor-actions">
-                  <button class="menu_button meowdb-tool-btn" type="button" @click="submitProfileEditor">??</button>
-                  <button class="menu_button meowdb-tool-btn" type="button" @click="closeProfileEditor">??</button>
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="submitProfileEditor">确认</button>
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="closeProfileEditor">取消</button>
                 </div>
               </div>
             </Transition>
@@ -325,13 +325,13 @@ function saveAsNewProfile(name: string) {
   const profile = createProfile(name);
   settings.value.api_profiles.push(profile);
   settings.value.api_active_profile_id = profile.id;
-  toastr.success('??????');
+  toastr.success('已创建新方案');
 }
 
 function renameCurrentProfile(name: string) {
   if (!activeProfile.value) return;
   activeProfile.value.name = name.trim() || activeProfile.value.name;
-  toastr.success('??????');
+  toastr.success('方案已重命名');
 }
 
 function openProfileEditor(mode: 'create' | 'rename') {
@@ -349,7 +349,7 @@ function closeProfileEditor() {
 function submitProfileEditor() {
   const name = profileEditorName.value.trim();
   if (!name) {
-    toastr.warning('???????');
+    toastr.warning('请输入方案名称');
     return;
   }
 
