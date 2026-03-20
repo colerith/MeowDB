@@ -1437,3 +1437,146 @@
     display: none;
   }
 }
+
+/* ==== MeowDB Design Language v3 (JuJuyly-inspired) ==== */
+:root {
+  --meowdb-font-sans:
+    'SF Pro Rounded', 'Avenir Next', 'Nunito', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --meowdb-brand-blue: #2f66d0;
+  --meowdb-brand-blue-2: #5f88dc;
+  --meowdb-brand-lime: #c8f173;
+  --meowdb-brand-ink: #1f2d4a;
+  --meowdb-brand-mist: #edf3ff;
+  --meowdb-brand-card: #f7faff;
+}
+
+.meowdb-modal,
+.meowdb-visual-shell {
+  font-family: var(--meowdb-font-sans);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(95, 136, 220, 0.24), transparent 60%),
+    linear-gradient(180deg, #f1f6ff 0%, #e9f0ff 100%);
+}
+
+.meowdb-title-group h3,
+.meowdb-title {
+  letter-spacing: 0.02em;
+  font-weight: 850;
+}
+
+.meowdb-title-group h3::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 28px;
+  margin-right: 10px;
+  border-radius: 3px;
+  vertical-align: -6px;
+  background: linear-gradient(180deg, var(--meowdb-brand-blue), var(--meowdb-brand-blue-2));
+}
+
+.meowdb-serial-badge {
+  color: var(--meowdb-brand-blue);
+  font-weight: 800;
+  border-color: rgba(90, 128, 209, 0.45);
+  background: linear-gradient(180deg, #f5f9ff, #e9f1ff);
+}
+
+.meowdb-action-btn,
+.meowdb-tool-btn,
+.menu_button {
+  font-family: var(--meowdb-font-sans);
+  font-weight: 750;
+}
+
+.meowdb-action-btn-ai {
+  background: linear-gradient(180deg, #e6efff, #d7e6ff);
+}
+
+.meowdb-tab,
+.meowdb-tab-btn {
+  font-weight: 800;
+}
+
+.meowdb-tab.is-active,
+.meowdb-tab-btn.active {
+  background: #ffffff;
+  border-color: rgba(94, 132, 212, 0.42);
+}
+
+.meowdb-card,
+.meowdb-rel-card,
+.meowdb-prompt-card,
+.meowdb-palette-card,
+.meowdb-rel-detail,
+.meowdb-tab-contents,
+.meowdb-rel-graph-collapse,
+.meowdb-edit-cell {
+  background: linear-gradient(180deg, #fbfdff 0%, var(--meowdb-brand-card) 100%);
+}
+
+.meowdb-card h4 strong,
+.meowdb-rel-name,
+.meowdb-prompt-card-head h4 {
+  color: var(--meowdb-brand-ink);
+}
+
+.meowdb-watermark {
+  color: rgba(63, 96, 158, 0.42);
+  letter-spacing: 0.06em;
+}
+
+.meowdb-rel-peek {
+  background: #f3f8ff;
+  color: #44639b;
+}
+
+.meowdb-favor-block .is-up {
+  color: #1aa867;
+}
+
+.meowdb-favor-block .is-down {
+  color: #e45858;
+}
+
+.meowdb-prompt-card-head h4 {
+  position: relative;
+  display: inline-block;
+  padding-right: 10px;
+}
+
+.meowdb-prompt-card-head h4::after {
+  content: '•';
+  color: var(--meowdb-brand-lime);
+  margin-left: 6px;
+}
+
+/* ---- Brand components ---- */
+.meowdb-title-stack {
+  display: grid;
+  gap: 2px;
+}
+
+.meowdb-brand-note {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(63, 97, 160, 0.72);
+  letter-spacing: 0.04em;
+}
+
+.meowdb-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.meowdb-tab i {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.meowdb-tab.is-active i {
+  color: var(--meowdb-brand-blue);
+  opacity: 1;
+}
