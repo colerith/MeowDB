@@ -73,7 +73,10 @@
             >
               <header class="meowdb-rel-card-head">
                 <div class="meowdb-rel-name">{{ relation.name }}</div>
-                <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
+                <div class="meowdb-rel-head-right">
+                  <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
+                  <span class="meowdb-rel-peek">查看详情</span>
+                </div>
               </header>
               <div class="meowdb-rel-line">⌾ {{ relation.genitalStatus || '未记录' }}</div>
               <div class="meowdb-rel-line">

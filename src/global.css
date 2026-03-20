@@ -1044,3 +1044,396 @@
     flex-direction: column;
   }
 }
+
+/* ---- iOS-inspired UI refresh ---- */
+:root {
+  --meowdb-ios-bg: rgba(248, 250, 255, 0.72);
+  --meowdb-ios-card: rgba(255, 255, 255, 0.78);
+  --meowdb-ios-border: rgba(156, 176, 216, 0.32);
+  --meowdb-ios-text: #1b2335;
+  --meowdb-ios-muted: #5d6b85;
+  --meowdb-ios-accent: #4a7aff;
+}
+
+.meowdb-modal,
+.meowdb-visual-shell {
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border-radius: 20px;
+  border: 1px solid var(--meowdb-ios-border);
+  box-shadow: 0 16px 44px rgba(20, 32, 58, 0.22);
+}
+
+.meowdb-modal {
+  background: linear-gradient(180deg, rgba(235, 241, 255, 0.82), rgba(228, 236, 255, 0.72));
+}
+
+.meowdb-visual-shell {
+  background: linear-gradient(180deg, rgba(240, 246, 255, 0.82), rgba(229, 238, 255, 0.75));
+}
+
+.meowdb-visual-shell,
+.meowdb-modal,
+.meowdb-visual-shell .meowdb-tab,
+.meowdb-modal .meowdb-tab-btn,
+.meowdb-visual-shell .meowdb-card,
+.meowdb-visual-shell .meowdb-rel-card,
+.meowdb-visual-shell .meowdb-rel-detail,
+.meowdb-modal .meowdb-tab-contents,
+.meowdb-modal .meowdb-prompt-card,
+.meowdb-modal .meowdb-palette-card {
+  color: var(--meowdb-ios-text);
+}
+
+.meowdb-tabs,
+.meowdb-tab-row {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--meowdb-ios-border);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.meowdb-tab-btn,
+.meowdb-tab {
+  border-radius: 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--meowdb-ios-muted);
+  font-weight: 700;
+}
+
+.meowdb-tab-btn.active,
+.meowdb-tab.is-active {
+  color: var(--meowdb-ios-text);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(146, 167, 207, 0.34);
+  box-shadow: 0 2px 10px rgba(34, 64, 122, 0.14);
+}
+
+.meowdb-card,
+.meowdb-rel-card,
+.meowdb-rel-detail,
+.meowdb-tab-contents,
+.meowdb-prompt-card,
+.meowdb-palette-card,
+.meowdb-rel-graph-collapse {
+  background: var(--meowdb-ios-card);
+  border: 1px solid var(--meowdb-ios-border);
+}
+
+.meowdb-input {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(153, 174, 214, 0.42);
+  color: var(--meowdb-ios-text);
+}
+
+.meowdb-input:focus {
+  border-color: rgba(74, 122, 255, 0.56);
+  box-shadow: 0 0 0 3px rgba(74, 122, 255, 0.18);
+  background: #fff;
+}
+
+.meowdb-rel-detail {
+  width: min(760px, 94vw);
+  max-height: min(68vh, 620px);
+  overflow: auto;
+  padding: 12px;
+}
+
+.meowdb-rel-edit-grid {
+  gap: 6px;
+}
+
+.meowdb-edit-cell {
+  padding: 7px;
+  border-radius: 9px;
+}
+
+.meowdb-edit-cell label {
+  font-size: 11px;
+}
+
+.meowdb-rel-head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meowdb-rel-peek {
+  font-size: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(150, 171, 209, 0.5);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--meowdb-ios-muted);
+  padding: 2px 7px;
+}
+
+.meowdb-rel-card {
+  padding-bottom: 14px;
+}
+
+.meowdb-rel-card::after {
+  content: none !important;
+}
+
+.meowdb-rel-card-foot {
+  margin-top: 6px;
+}
+
+.meowdb-rel-detail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.meowdb-rel-detail::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(122, 147, 191, 0.45);
+}
+
+.meowdb-rel-detail::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+/* ==== MeowDB iOS Refresh v2 (theme + motion) ==== */
+:root {
+  --meowdb-ios-bg-top: rgba(247, 250, 255, 0.9);
+  --meowdb-ios-bg-bottom: rgba(236, 243, 255, 0.82);
+  --meowdb-ios-surface: rgba(255, 255, 255, 0.78);
+  --meowdb-ios-surface-strong: rgba(255, 255, 255, 0.92);
+  --meowdb-ios-border: rgba(138, 164, 214, 0.34);
+  --meowdb-ios-text: #1a2336;
+  --meowdb-ios-text-muted: #5b6b89;
+  --meowdb-ios-blue: #4c7dff;
+  --meowdb-ios-cyan: #38bdf8;
+  --meowdb-ios-green: #1fbc73;
+  --meowdb-ios-red: #ef5350;
+  --meowdb-ios-shadow: 0 14px 36px rgba(30, 49, 88, 0.2);
+}
+
+.meowdb-modal-overlay {
+  background: radial-gradient(120% 120% at 50% -10%, rgba(114, 144, 211, 0.26), rgba(23, 34, 56, 0.38));
+  backdrop-filter: blur(6px) saturate(1.05);
+}
+
+.meowdb-modal,
+.meowdb-visual-shell {
+  background: linear-gradient(180deg, var(--meowdb-ios-bg-top), var(--meowdb-ios-bg-bottom));
+  border: 1px solid var(--meowdb-ios-border);
+  box-shadow: var(--meowdb-ios-shadow);
+  color: var(--meowdb-ios-text);
+}
+
+.meowdb-visual-shell {
+  padding: 12px;
+}
+
+.meowdb-title-group h3,
+.meowdb-title,
+.meowdb-card h4,
+.meowdb-rel-name,
+.meowdb-prompt-card-head h4 {
+  color: var(--meowdb-ios-text);
+}
+
+.meowdb-version,
+.meowdb-watermark,
+.meowdb-rel-line,
+.meowdb-rel-gender,
+.meowdb-prompt-card-head p,
+.meowdb-prompt-meta,
+.meowdb-setting-row,
+.meowdb-tab:disabled,
+.meowdb-tab-btn:disabled {
+  color: var(--meowdb-ios-text-muted);
+}
+
+.meowdb-tabs,
+.meowdb-tab-row {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(148, 173, 219, 0.28);
+}
+
+.meowdb-tab,
+.meowdb-tab-btn {
+  color: var(--meowdb-ios-text-muted);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.meowdb-tab.is-active,
+.meowdb-tab-btn.active {
+  color: var(--meowdb-ios-text);
+  background: var(--meowdb-ios-surface-strong);
+  border-color: rgba(133, 159, 210, 0.42);
+  box-shadow: 0 4px 12px rgba(47, 79, 145, 0.13);
+}
+
+.meowdb-tab:not(:disabled):hover,
+.meowdb-tab-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.meowdb-card,
+.meowdb-rel-card,
+.meowdb-rel-detail,
+.meowdb-tab-contents,
+.meowdb-prompt-card,
+.meowdb-palette-card,
+.meowdb-rel-graph-collapse,
+.meowdb-edit-cell {
+  background: var(--meowdb-ios-surface);
+  border: 1px solid var(--meowdb-ios-border);
+  box-shadow: 0 4px 12px rgba(64, 91, 142, 0.08);
+}
+
+.meowdb-card p,
+.meowdb-rel-card-foot span,
+.meowdb-rel-detail-grid p {
+  color: #27324a;
+}
+
+.meowdb-action-btn {
+  border-color: rgba(136, 162, 212, 0.45);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 247, 255, 0.9));
+  color: #2d3d5e;
+}
+
+.meowdb-action-btn i {
+  color: var(--meowdb-ios-blue);
+}
+
+.meowdb-action-btn-ai {
+  border-color: rgba(81, 129, 255, 0.45);
+  background: linear-gradient(180deg, rgba(232, 242, 255, 0.98), rgba(217, 233, 255, 0.92));
+  color: #22427f;
+}
+
+.meowdb-action-btn-ai i {
+  color: #3f74ff;
+}
+
+.meowdb-action-btn:active:not(:disabled),
+.meowdb-tool-btn:active:not(:disabled),
+.menu_button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.meowdb-input,
+.meowdb-prompt-textarea {
+  background: rgba(255, 255, 255, 0.93);
+  color: #1f2a40;
+}
+
+.meowdb-input::placeholder,
+.meowdb-prompt-textarea::placeholder {
+  color: #7b8cae;
+}
+
+.meowdb-input:focus,
+.meowdb-prompt-textarea:focus {
+  border-color: rgba(76, 125, 255, 0.56);
+  box-shadow: 0 0 0 3px rgba(76, 125, 255, 0.18);
+}
+
+.meowdb-serial-badge {
+  color: #2554b5;
+  border-color: rgba(101, 139, 223, 0.4);
+  background: linear-gradient(180deg, rgba(242, 247, 255, 0.96), rgba(230, 239, 255, 0.9));
+}
+
+.meowdb-favor-block .is-up {
+  color: var(--meowdb-ios-green);
+}
+
+.meowdb-favor-block .is-down {
+  color: var(--meowdb-ios-red);
+}
+
+.meowdb-rel-card {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.meowdb-rel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(58, 89, 152, 0.17);
+  border-color: rgba(109, 146, 228, 0.5);
+}
+
+.meowdb-rel-peek {
+  color: #3f5379;
+  border-color: rgba(139, 163, 209, 0.52);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.meowdb-rel-detail {
+  border-radius: 16px;
+}
+
+.meowdb-rel-detail-nav,
+.meowdb-rel-bulk-actions {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(245, 250, 255, 0.96), rgba(245, 250, 255, 0.76));
+  padding: 6px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(162, 183, 224, 0.35);
+}
+
+.meowdb-rel-detail-nav {
+  margin-bottom: 8px;
+}
+
+.meowdb-rel-bulk-actions {
+  margin-bottom: 10px;
+}
+
+.meowdb-rel-graph {
+  background:
+    radial-gradient(130% 140% at 0% 0%, rgba(139, 166, 224, 0.25), rgba(228, 238, 255, 0.66)),
+    linear-gradient(180deg, rgba(242, 247, 255, 0.88), rgba(226, 236, 255, 0.78));
+}
+
+.meowdb-rel-graph-edge line {
+  stroke: rgba(83, 122, 198, 0.5);
+}
+
+.meowdb-rel-graph-edge text {
+  fill: #405a90;
+}
+
+.meowdb-rel-graph-node text {
+  fill: #2b3c63;
+}
+
+.meowdb-modal-overlay.open .meowdb-modal,
+.meowdb-visual-shell {
+  animation: meowdb-ios-pop 260ms ease both;
+}
+
+@keyframes meowdb-ios-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.988);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 820px) {
+  .meowdb-visual-shell {
+    padding: 10px;
+  }
+
+  .meowdb-action-btn span {
+    display: none;
+  }
+}
