@@ -2647,3 +2647,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==== Modal quick cleanup ==== */
+.meowdb-title {
+  font-size: 18px;
+  font-weight: 760;
+}
+
+.meowdb-profile-toolbar {
+  grid-template-columns: 1fr;
+}
+
+.meowdb-setting-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.meowdb-setting-actions .meowdb-tool-btn {
+  width: 100%;
+}
