@@ -79,8 +79,12 @@
             </div>
 
             <div class="meowdb-setting-actions">
-              <button class="menu_button meowdb-tool-btn" type="button" @click="saveAsNewProfile">新建方案</button>
-              <button class="menu_button meowdb-tool-btn" type="button" @click="renameCurrentProfile">重命名</button>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="openProfileEditor('create')">
+                新建方案
+              </button>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="openProfileEditor('rename')">
+                重命名
+              </button>
               <button class="menu_button meowdb-tool-btn" type="button" @click="updateCurrentProfile">保存方案</button>
               <button class="menu_button meowdb-tool-btn" type="button" @click="exportCurrentProfile">导出</button>
               <button class="menu_button meowdb-tool-btn" type="button" @click="triggerImportProfile">导入</button>
@@ -100,6 +104,25 @@
                 @change="onImportProfileFile"
               />
             </div>
+
+            <Transition name="meowdb-fade">
+              <div v-if="profileEditorOpen" class="meowdb-profile-editor" @keydown.enter.prevent="submitProfileEditor">
+                <label class="meowdb-setting-stack">
+                  <span>{{ profileEditorMode === 'create' ? '???????' : '?????' }}</span>
+                  <input
+                    ref="profileEditorInput"
+                    class="meowdb-input"
+                    v-model.trim="profileEditorName"
+                    type="text"
+                    placeholder="???OpenRouter-???"
+                  />
+                </label>
+                <div class="meowdb-profile-editor-actions">
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="submitProfileEditor">??</button>
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="closeProfileEditor">??</button>
+                </div>
+              </div>
+            </Transition>
 
             <div class="meowdb-setting-grid-2">
               <label class="meowdb-setting-row meowdb-setting-stack">
@@ -242,6 +265,10 @@ const fetchingModels = ref(false);
 const testingConnection = ref(false);
 const modelOptions = ref<string[]>([]);
 const profileImportInput = ref<HTMLInputElement | null>(null);
+const profileEditorInput = ref<HTMLInputElement | null>(null);
+const profileEditorOpen = ref(false);
+const profileEditorMode = ref<'create' | 'rename'>('create');
+const profileEditorName = ref('');
 
 const apiProfiles = computed<ApiProfile[]>(() => settings.value.api_profiles as ApiProfile[]);
 const activeProfile = computed<ApiProfile | null>(() => {
@@ -294,19 +321,45 @@ function syncFieldsToActiveProfile() {
   activeProfile.value.max_tokens = Number(settings.value.api_max_tokens || 1200);
 }
 
-function saveAsNewProfile() {
-  const profile = createProfile();
+function saveAsNewProfile(name: string) {
+  const profile = createProfile(name);
   settings.value.api_profiles.push(profile);
   settings.value.api_active_profile_id = profile.id;
-  toastr.success('已创建新方案');
+  toastr.success('??????');
 }
 
-function renameCurrentProfile() {
+function renameCurrentProfile(name: string) {
   if (!activeProfile.value) return;
-  const next = prompt('请输入新的方案名称：', activeProfile.value.name || '');
-  if (!next) return;
-  activeProfile.value.name = next.trim() || activeProfile.value.name;
-  toastr.success('方案已重命名');
+  activeProfile.value.name = name.trim() || activeProfile.value.name;
+  toastr.success('??????');
+}
+
+function openProfileEditor(mode: 'create' | 'rename') {
+  profileEditorMode.value = mode;
+  profileEditorName.value = mode === 'rename' ? activeProfile.value?.name || '' : '';
+  profileEditorOpen.value = true;
+  nextTick(() => profileEditorInput.value?.focus());
+}
+
+function closeProfileEditor() {
+  profileEditorOpen.value = false;
+  profileEditorName.value = '';
+}
+
+function submitProfileEditor() {
+  const name = profileEditorName.value.trim();
+  if (!name) {
+    toastr.warning('???????');
+    return;
+  }
+
+  if (profileEditorMode.value === 'create') {
+    saveAsNewProfile(name);
+  } else {
+    renameCurrentProfile(name);
+  }
+
+  closeProfileEditor();
 }
 
 function updateCurrentProfile() {
