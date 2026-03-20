@@ -244,11 +244,256 @@ const modelOptions = ref<string[]>([]);
 const profileImportInput = ref<HTMLInputElement | null>(null);
 
 const apiProfiles = computed<ApiProfile[]>(() => settings.value.api_profiles as ApiProfile[]);
-
 const activeProfile = computed<ApiProfile | null>(() => {
   const id = settings.value.api_active_profile_id;
   return apiProfiles.value.find(item => item.id === id) ?? null;
 });
+
+function makeProfileId() {
+  return `api_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function createProfile(name?: string): ApiProfile {
+  return {
+    id: makeProfileId(),
+    name: name?.trim() || `配置 ${apiProfiles.value.length + 1}`,
+    enabled: Boolean(settings.value.api_enabled),
+    url: settings.value.api_url || '',
+    key: settings.value.api_key || '',
+    model: settings.value.api_model || '',
+    temperature: Number(settings.value.api_temperature || 0.7),
+    max_tokens: Number(settings.value.api_max_tokens || 1200),
+  };
+}
+
+function ensureProfiles() {
+  if (!Array.isArray(settings.value.api_profiles)) settings.value.api_profiles = [];
+  if (settings.value.api_profiles.length === 0) settings.value.api_profiles.push(createProfile('默认配置'));
+
+  const exists = settings.value.api_profiles.some(item => item.id === settings.value.api_active_profile_id);
+  if (!exists) settings.value.api_active_profile_id = settings.value.api_profiles[0]?.id || '';
+}
+
+function applyProfileToFields(profile: ApiProfile | null) {
+  if (!profile) return;
+  settings.value.api_enabled = profile.enabled;
+  settings.value.api_url = profile.url;
+  settings.value.api_key = profile.key;
+  settings.value.api_model = profile.model;
+  settings.value.api_temperature = profile.temperature;
+  settings.value.api_max_tokens = profile.max_tokens;
+}
+
+function syncFieldsToActiveProfile() {
+  if (!activeProfile.value) return;
+  activeProfile.value.enabled = Boolean(settings.value.api_enabled);
+  activeProfile.value.url = settings.value.api_url || '';
+  activeProfile.value.key = settings.value.api_key || '';
+  activeProfile.value.model = settings.value.api_model || '';
+  activeProfile.value.temperature = Number(settings.value.api_temperature || 0.7);
+  activeProfile.value.max_tokens = Number(settings.value.api_max_tokens || 1200);
+}
+
+function saveAsNewProfile() {
+  const profile = createProfile();
+  settings.value.api_profiles.push(profile);
+  settings.value.api_active_profile_id = profile.id;
+  toastr.success('已创建新方案');
+}
+
+function renameCurrentProfile() {
+  if (!activeProfile.value) return;
+  const next = prompt('请输入新的方案名称：', activeProfile.value.name || '');
+  if (!next) return;
+  activeProfile.value.name = next.trim() || activeProfile.value.name;
+  toastr.success('方案已重命名');
+}
+
+function updateCurrentProfile() {
+  syncFieldsToActiveProfile();
+  toastr.success('当前方案已保存');
+}
+
+function removeCurrentProfile() {
+  if (settings.value.api_profiles.length <= 1) return;
+  const id = settings.value.api_active_profile_id;
+  settings.value.api_profiles = settings.value.api_profiles.filter(item => item.id !== id);
+  settings.value.api_active_profile_id = settings.value.api_profiles[0]?.id || '';
+  applyProfileToFields(activeProfile.value);
+  toastr.success('已删除当前方案');
+}
+
+function exportCurrentProfile() {
+  if (!activeProfile.value) return;
+  const payload = {
+    ...activeProfile.value,
+    exportedAt: new Date().toISOString(),
+    format: 'meowdb-api-profile-v1',
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const safeName = (activeProfile.value.name || 'api-profile').replace(/[^a-zA-Z0-9\u4e00-\u9fa5-_]/g, '_');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `meowdb-${safeName}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toastr.success('已导出当前方案');
+}
+
+function triggerImportProfile() {
+  profileImportInput.value?.click();
+}
+
+async function onImportProfileFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text) as Partial<ApiProfile>;
+
+    const profile: ApiProfile = {
+      id: makeProfileId(),
+      name: (data.name || file.name.replace(/\.json$/i, '') || '导入方案').trim(),
+      enabled: Boolean(data.enabled),
+      url: String(data.url || ''),
+      key: String(data.key || ''),
+      model: String(data.model || ''),
+      temperature: Number(data.temperature ?? 0.7),
+      max_tokens: Number(data.max_tokens ?? 1200),
+    };
+
+    if (!Number.isFinite(profile.temperature)) profile.temperature = 0.7;
+    if (!Number.isFinite(profile.max_tokens) || profile.max_tokens <= 0) profile.max_tokens = 1200;
+
+    settings.value.api_profiles.push(profile);
+    settings.value.api_active_profile_id = profile.id;
+    applyProfileToFields(profile);
+    toastr.success('方案导入成功');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    toastr.error(`导入失败：${message}`);
+  } finally {
+    input.value = '';
+  }
+}
+
+function normalizeUrl(url: string) {
+  return url.trim().replace(/\/$/, '');
+}
+
+async function fetchModels() {
+  const url = normalizeUrl(settings.value.api_url);
+  if (!url) {
+    toastr.warning('请先填写 API URL');
+    return;
+  }
+
+  fetchingModels.value = true;
+  try {
+    const response = await fetch(`${url}/models`, {
+      headers: {
+        ...(settings.value.api_key ? { Authorization: `Bearer ${settings.value.api_key}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const reason = await response.text();
+      throw new Error(reason || `HTTP ${response.status}`);
+    }
+
+    const data = (await response.json()) as { data?: Array<{ id?: string }> };
+    const ids = (data.data ?? []).map(item => item.id).filter((item): item is string => Boolean(item));
+
+    if (ids.length === 0) {
+      toastr.warning('未拉取到模型列表');
+      return;
+    }
+
+    modelOptions.value = ids;
+    if (!settings.value.api_model) settings.value.api_model = ids[0];
+    syncFieldsToActiveProfile();
+    toastr.success(`已拉取 ${ids.length} 个模型`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    toastr.error(`拉取模型失败：${message}`);
+  } finally {
+    fetchingModels.value = false;
+  }
+}
+
+async function testConnection() {
+  const url = normalizeUrl(settings.value.api_url);
+  if (!url) {
+    toastr.warning('请先填写 API URL');
+    return;
+  }
+
+  testingConnection.value = true;
+  try {
+    const response = await fetch(`${url}/models`, {
+      headers: {
+        ...(settings.value.api_key ? { Authorization: `Bearer ${settings.value.api_key}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const reason = await response.text();
+      throw new Error(reason || `HTTP ${response.status}`);
+    }
+
+    toastr.success('连接测试成功');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    toastr.error(`连接测试失败：${message}`);
+  } finally {
+    testingConnection.value = false;
+  }
+}
+
+async function injectSample() {
+  if (injecting.value) return;
+  injecting.value = true;
+
+  const ok = await saveCurrentEntry(sampleEntry);
+  injecting.value = false;
+
+  if (!ok) {
+    toastr.error('示例数据注入失败');
+    return;
+  }
+
+  toastr.success('示例数据已注入');
+}
+
+async function clearAll() {
+  if (clearing.value) return;
+  clearing.value = true;
+
+  const cleared = await clearAllEntries();
+  clearing.value = false;
+
+  toastr.success(cleared > 0 ? `已清空 ${cleared} 条 MeowDB 数据` : '当前聊天没有可清空的 MeowDB 数据');
+}
+
+function restoreRelationsPrompt() {
+  settings.value.relations_prompt = DEFAULT_RELATIONS_PROMPT;
+  toastr.success('已还原默认 relations 提示词');
+}
+
+watch(
+  () => settings.value.api_active_profile_id,
+  () => {
+    ensureProfiles();
+    applyProfileToFields(activeProfile.value);
+  },
+  { immediate: true },
+);
 
 watch(
   () => [
@@ -259,9 +504,7 @@ watch(
     settings.value.api_temperature,
     settings.value.api_max_tokens,
   ],
-  () => {
-    syncFieldsToActiveProfile();
-  },
+  () => syncFieldsToActiveProfile(),
 );
 
 onMounted(() => {

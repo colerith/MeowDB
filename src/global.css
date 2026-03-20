@@ -2667,3 +2667,9 @@
 .meowdb-setting-actions .meowdb-tool-btn {
   width: 100%;
 }
+
+/* only in MeowDB modal: hide host checkbox pseudo icon */
+.meowdb-modal input[type='checkbox'].meowdb-check::before {
+  content: none !important;
+  display: none !important;
+}
