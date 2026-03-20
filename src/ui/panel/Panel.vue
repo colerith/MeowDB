@@ -66,8 +66,8 @@
               <span class="meowdb-empty-dot is-b"></span>
               <span class="meowdb-empty-dot is-c"></span>
             </div>
-            <h4>??????</h4>
-            <p>?????AI????????????????</p>
+            <h4>暂无可视化数据</h4>
+            <p>发送几轮消息后，点击 AI 更新即可生成当前快照。</p>
           </div>
           <div class="meowdb-watermark">MeowDB Story Snapshot</div>
         </div>
@@ -112,8 +112,8 @@
               <span class="meowdb-empty-dot is-b"></span>
               <span class="meowdb-empty-dot is-c"></span>
             </div>
-            <h4>??????</h4>
-            <p>?????????? relations ????????</p>
+            <h4>暂无关系数据</h4>
+            <p>请先执行 AI 更新，或在 relations_json 中写入角色关系。</p>
           </div>
 
           <details v-if="relations.length > 0" class="meowdb-rel-graph-collapse">
@@ -205,13 +205,17 @@
             </div>
 
             <section class="meowdb-rel-edit-section">
-              <h4>基础信息</h4>
-              <div class="meowdb-rel-edit-grid">
+              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-id-card"></i><span>基础信息</span></h4>
+              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-core">
                 <div
                   v-for="field in coreFields"
                   :key="field.key"
                   class="meowdb-edit-cell"
-                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                  :class="[
+                    'meowdb-bento-cell',
+                    getFieldClass('core', field.key),
+                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                  ]"
                 >
                   <label>{{ field.label }}</label>
                   <input class="meowdb-input" :type="field.type || 'text'" v-model="draft[field.key]" />
@@ -220,13 +224,17 @@
             </section>
 
             <section class="meowdb-rel-edit-section">
-              <h4>服饰拆解</h4>
-              <div class="meowdb-rel-edit-grid">
+              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-shirt"></i><span>服饰拆解</span></h4>
+              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-clothing">
                 <div
                   v-for="field in clothingFields"
                   :key="field.key"
                   class="meowdb-edit-cell"
-                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                  :class="[
+                    'meowdb-bento-cell',
+                    getFieldClass('clothing', field.key),
+                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                  ]"
                 >
                   <label>{{ field.label }}</label>
                   <input class="meowdb-input" v-model="draft[field.key]" />
@@ -235,13 +243,17 @@
             </section>
 
             <section class="meowdb-rel-edit-section">
-              <h4>外貌拆解</h4>
-              <div class="meowdb-rel-edit-grid">
+              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-user"></i><span>外貌拆解</span></h4>
+              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-appearance">
                 <div
                   v-for="field in appearanceFields"
                   :key="field.key"
                   class="meowdb-edit-cell"
-                  :class="{ 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) }"
+                  :class="[
+                    'meowdb-bento-cell',
+                    getFieldClass('appearance', field.key),
+                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                  ]"
                 >
                   <label>{{ field.label }}</label>
                   <input class="meowdb-input" v-model="draft[field.key]" />
@@ -556,6 +568,26 @@ function selectPrev() {
 function selectNext() {
   if (selectedIndex.value < 0 || selectedIndex.value >= relations.value.length - 1) return;
   selectedRelation.value = relations.value[selectedIndex.value + 1] ?? null;
+}
+
+function getFieldClass(section: 'core' | 'clothing' | 'appearance', key: string) {
+  if (section == 'core') {
+    if (key == 'bond' || key == 'favorChange' || key == 'clothing' || key == 'appearance') return 'is-wide';
+    if (key == 'action' || key == 'coordinate') return 'is-mid';
+    return 'is-compact';
+  }
+
+  if (section == 'clothing') {
+    if (key.endsWith('upper') || key.endsWith('lower') || key.endsWith('shoesSocks')) return 'is-mid';
+    return 'is-compact';
+  }
+
+  if (section == 'appearance') {
+    if (key.endsWith('height') || key.endsWith('bodyType')) return 'is-mid';
+    return 'is-compact';
+  }
+
+  return 'is-compact';
 }
 
 function isFieldManual(path: string) {
