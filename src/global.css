@@ -2495,3 +2495,155 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==== Modal UI polish: typography, alignment, checkbox, api profile ==== */
+.meowdb-modal {
+  color: #203251;
+}
+
+.meowdb-drawer-body .drawer-header {
+  align-items: flex-start;
+}
+
+.meowdb-title {
+  font-weight: 780;
+  font-size: 38px;
+  letter-spacing: 0.01em;
+  color: #1e2a42;
+}
+
+.meowdb-version {
+  color: #7487a8;
+  font-weight: 600;
+}
+
+.meowdb-settings-section {
+  border: 1px solid rgba(171, 189, 222, 0.35);
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(245, 250, 255, 0.72));
+  display: grid;
+  gap: 10px;
+}
+
+.meowdb-setting-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #2c436d;
+}
+
+.meowdb-setting-row {
+  min-height: 34px;
+  color: #51678f;
+  font-size: 15px;
+  font-weight: 630;
+}
+
+.meowdb-setting-row > span {
+  color: #556d96;
+}
+
+.meowdb-check {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(153, 176, 216, 0.65);
+  background: rgba(255, 255, 255, 0.75);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.meowdb-check:checked {
+  border-color: rgba(71, 124, 208, 0.8);
+  background: linear-gradient(180deg, rgba(106, 156, 235, 0.95), rgba(70, 124, 212, 0.95));
+}
+
+.meowdb-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.meowdb-profile-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.meowdb-profile-field,
+.meowdb-profile-name {
+  min-width: 0;
+}
+
+.meowdb-setting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meowdb-setting-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.meowdb-model-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.meowdb-setting-stack {
+  align-items: stretch;
+}
+
+.meowdb-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d4b84;
+  border-color: rgba(149, 177, 224, 0.62);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(242, 247, 255, 0.74));
+}
+
+.meowdb-tool-btn.danger {
+  color: #b25555;
+  border-color: rgba(206, 128, 128, 0.55);
+  background: linear-gradient(180deg, rgba(255, 248, 248, 0.95), rgba(255, 241, 241, 0.8));
+}
+
+.meowdb-tab-contents {
+  padding: 12px;
+}
+
+/* collapsed padding keep consistent with expanded */
+.meowdb-visual-shell {
+  padding: 14px 16px;
+}
+
+.meowdb-visual-shell.is-collapsed {
+  padding: 14px 16px;
+}
+
+@media (max-width: 960px) {
+  .meowdb-profile-toolbar,
+  .meowdb-setting-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .meowdb-model-row {
+    grid-template-columns: 1fr;
+  }
+}

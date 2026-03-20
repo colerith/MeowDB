@@ -1,4 +1,16 @@
 ﻿export type Settings = z.infer<typeof Settings>;
+
+const ApiProfile = z.object({
+  id: z.string().default(''),
+  name: z.string().default('默认配置'),
+  enabled: z.boolean().default(false),
+  url: z.string().default(''),
+  key: z.string().default(''),
+  model: z.string().default(''),
+  temperature: z.number().min(0).max(2).default(0.7),
+  max_tokens: z.number().int().positive().default(1200),
+});
+
 export const Settings = z
   .object({
     enabled: z.boolean().default(true),
@@ -11,6 +23,8 @@ export const Settings = z
     api_model: z.string().default(''),
     api_temperature: z.number().min(0).max(2).default(0.7),
     api_max_tokens: z.number().int().positive().default(1200),
+    api_profiles: z.array(ApiProfile).default([]),
+    api_active_profile_id: z.string().default(''),
 
     relations_prompt: z.string().default(''),
     relation_colors: z.array(z.string()).length(5).default(['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd']),
