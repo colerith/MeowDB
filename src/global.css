@@ -1798,3 +1798,269 @@
     height: 78px;
   }
 }
+
+/* ==== Cleanup & Bento refinement (no top banner) ==== */
+.meowdb-title-group h3 {
+  all: unset;
+}
+
+.meowdb-title-text {
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 860;
+  letter-spacing: 0.01em;
+  color: #23324e;
+  position: relative;
+  padding-left: 14px;
+}
+
+.meowdb-title-text::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 4px;
+  height: 34px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #3a6fda, #77a4ff);
+}
+
+.meowdb-visual-shell,
+.meowdb-modal {
+  background: linear-gradient(180deg, #eff3f9 0%, #e7edf7 100%);
+}
+
+.meowdb-tab-contents,
+.meowdb-card,
+.meowdb-rel-card,
+.meowdb-rel-detail,
+.meowdb-palette-card,
+.meowdb-prompt-card,
+.meowdb-rel-graph-collapse,
+.meowdb-edit-cell {
+  background: #f8fbff;
+  border-color: rgba(130, 152, 194, 0.28);
+  box-shadow: 0 6px 16px rgba(35, 55, 92, 0.06);
+}
+
+.meowdb-rel-detail {
+  width: min(1120px, 96vw) !important;
+  max-height: min(58vh, 520px) !important;
+  padding: 10px;
+}
+
+.meowdb-rel-detail h3 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.meowdb-rel-detail-nav,
+.meowdb-rel-bulk-actions {
+  padding: 4px;
+}
+
+.meowdb-rel-edit-section {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.meowdb-rel-edit-section h4 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.meowdb-rel-edit-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.meowdb-edit-cell {
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.meowdb-edit-cell label {
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.meowdb-edit-cell .meowdb-input {
+  min-height: 32px;
+  padding: 6px 9px;
+}
+
+@media (max-width: 1400px) {
+  .meowdb-rel-edit-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .meowdb-title-text {
+    font-size: 34px;
+  }
+
+  .meowdb-rel-detail {
+    max-height: min(64vh, 560px) !important;
+  }
+
+  .meowdb-rel-edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .meowdb-title-text {
+    font-size: 28px;
+    padding-left: 10px;
+  }
+
+  .meowdb-title-text::before {
+    height: 26px;
+    width: 3px;
+  }
+
+  .meowdb-rel-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==== Final Polish: spacing scale + button system + graph readability ==== */
+:root {
+  --meowdb-r-8: 8px;
+  --meowdb-r-12: 12px;
+  --meowdb-r-16: 16px;
+  --meowdb-gap-8: 8px;
+  --meowdb-gap-12: 12px;
+  --meowdb-gap-16: 16px;
+  --meowdb-btn-h-s: 30px;
+  --meowdb-btn-h-m: 36px;
+  --meowdb-btn-h-l: 42px;
+}
+
+.meowdb-visual-shell,
+.meowdb-modal {
+  border-radius: var(--meowdb-r-16);
+}
+
+.meowdb-tab-contents,
+.meowdb-card,
+.meowdb-rel-card,
+.meowdb-rel-detail,
+.meowdb-prompt-card,
+.meowdb-palette-card,
+.meowdb-rel-graph-collapse,
+.meowdb-edit-cell {
+  border-radius: var(--meowdb-r-12);
+}
+
+.meowdb-tab,
+.meowdb-tab-btn,
+.meowdb-input,
+.meowdb-rel-peek,
+.meowdb-serial-badge {
+  border-radius: var(--meowdb-r-8);
+}
+
+.meowdb-visual-header,
+.meowdb-tab-row,
+.meowdb-card-grid,
+.meowdb-rel-cards,
+.meowdb-rel-wrap,
+.meowdb-rel-edit-grid,
+.meowdb-prompt-card,
+.meowdb-palette-card {
+  gap: var(--meowdb-gap-12);
+}
+
+.meowdb-rel-detail {
+  gap: var(--meowdb-gap-8);
+}
+
+.menu_button,
+.meowdb-tool-btn,
+.meowdb-tab,
+.meowdb-tab-btn,
+.meowdb-action-btn,
+.meowdb-rel-detail-nav .menu_button,
+.meowdb-rel-bulk-actions .menu_button {
+  min-height: var(--meowdb-btn-h-m);
+  border-radius: var(--meowdb-r-8);
+  font-weight: 760;
+}
+
+.meowdb-rel-detail-nav .menu_button,
+.meowdb-rel-bulk-actions .menu_button {
+  min-height: var(--meowdb-btn-h-s);
+  padding: 0 10px;
+}
+
+.meowdb-action-btn {
+  min-height: var(--meowdb-btn-h-m);
+  padding: 0 12px;
+}
+
+.meowdb-action-btn i,
+.meowdb-tab i,
+.meowdb-tab-btn i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.meowdb-title-text,
+.meowdb-rel-name,
+.meowdb-prompt-card-head h4,
+.meowdb-card h4 {
+  letter-spacing: 0.01em;
+}
+
+.meowdb-rel-line,
+.meowdb-card p,
+.meowdb-edit-cell label,
+.meowdb-prompt-card-head p,
+.meowdb-prompt-meta {
+  letter-spacing: 0;
+}
+
+/* Graph: cleaner and more readable */
+.meowdb-rel-graph-shell {
+  padding: 10px;
+}
+
+.meowdb-rel-graph {
+  border-radius: var(--meowdb-r-12);
+  background: linear-gradient(180deg, #f5f9ff, #edf3ff);
+}
+
+.meowdb-rel-graph-edge line {
+  stroke: rgba(88, 120, 190, 0.56);
+  stroke-width: 1.4;
+}
+
+.meowdb-rel-graph-edge text {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #3d5689;
+  paint-order: stroke;
+  stroke: rgba(245, 250, 255, 0.95);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.meowdb-rel-graph-node circle {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
+}
+
+.meowdb-rel-graph-node text {
+  font-size: 13px;
+  font-weight: 760;
+  fill: #243963;
+}
+
+@media (max-width: 1080px) {
+  .meowdb-rel-edit-grid {
+    gap: var(--meowdb-gap-8);
+  }
+}

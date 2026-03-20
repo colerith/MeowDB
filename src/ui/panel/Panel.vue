@@ -24,20 +24,6 @@
       </div>
     </header>
 
-    <div v-if="!panelCollapsed" class="meowdb-brand-banner">
-      <div class="meowdb-brand-banner-copy">
-        <p class="meowdb-brand-kicker">MEOWDB VISUAL KIT</p>
-        <h4>Playful Native UI</h4>
-        <p>?????? App ???????????????</p>
-      </div>
-      <div class="meowdb-brand-banner-illu" aria-hidden="true">
-        <span class="meowdb-blob is-a"></span>
-        <span class="meowdb-blob is-b"></span>
-        <span class="meowdb-blob is-c"></span>
-        <span class="meowdb-pill">Meow</span>
-      </div>
-    </div>
-
     <template v-if="!panelCollapsed">
       <nav class="meowdb-tab-row">
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'status' }" @click="activeTab = 'status'">
