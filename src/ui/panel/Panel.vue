@@ -24,6 +24,20 @@
       </div>
     </header>
 
+    <div v-if="!panelCollapsed" class="meowdb-brand-banner">
+      <div class="meowdb-brand-banner-copy">
+        <p class="meowdb-brand-kicker">MEOWDB VISUAL KIT</p>
+        <h4>Playful Native UI</h4>
+        <p>?????? App ???????????????</p>
+      </div>
+      <div class="meowdb-brand-banner-illu" aria-hidden="true">
+        <span class="meowdb-blob is-a"></span>
+        <span class="meowdb-blob is-b"></span>
+        <span class="meowdb-blob is-c"></span>
+        <span class="meowdb-pill">Meow</span>
+      </div>
+    </div>
+
     <template v-if="!panelCollapsed">
       <nav class="meowdb-tab-row">
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'status' }" @click="activeTab = 'status'">
@@ -42,7 +56,7 @@
 
       <Transition name="meowdb-fade" mode="out-in">
         <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
-          <div class="meowdb-card-grid">
+          <div v-if="hasStatusData" class="meowdb-card-grid">
             <article class="meowdb-card">
               <h4><strong>当前时间</strong></h4>
               <p>{{ entry?.time || '未设置' }}</p>
@@ -60,11 +74,20 @@
               <p>{{ nsfwText }}</p>
             </article>
           </div>
+          <div v-else class="meowdb-empty-state">
+            <div class="meowdb-empty-illu" aria-hidden="true">
+              <span class="meowdb-empty-dot is-a"></span>
+              <span class="meowdb-empty-dot is-b"></span>
+              <span class="meowdb-empty-dot is-c"></span>
+            </div>
+            <h4>??????</h4>
+            <p>?????AI????????????????</p>
+          </div>
           <div class="meowdb-watermark">MeowDB Story Snapshot</div>
         </div>
 
         <div v-else-if="activeTab === 'relations'" key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
-          <section class="meowdb-rel-cards">
+          <section v-if="relations.length > 0" class="meowdb-rel-cards">
             <article
               v-for="relation in relations"
               :key="relation.name"
@@ -97,8 +120,17 @@
               </footer>
             </article>
           </section>
+          <div v-else class="meowdb-empty-state meowdb-empty-state-rel">
+            <div class="meowdb-empty-illu" aria-hidden="true">
+              <span class="meowdb-empty-dot is-a"></span>
+              <span class="meowdb-empty-dot is-b"></span>
+              <span class="meowdb-empty-dot is-c"></span>
+            </div>
+            <h4>??????</h4>
+            <p>?????????? relations ????????</p>
+          </div>
 
-          <details class="meowdb-rel-graph-collapse">
+          <details v-if="relations.length > 0" class="meowdb-rel-graph-collapse">
             <summary>
               <i class="fa-solid fa-circle-nodes"></i>
               关系图谱（点击展开）
@@ -378,6 +410,12 @@ const nsfwText = computed(() => {
   const nsfw = entry.value?.nsfw;
   if (!nsfw) return '0/0';
   return `${nsfw.current}/${nsfw.max}`;
+});
+
+const hasStatusData = computed(() => {
+  const e = entry.value;
+  if (!e) return false;
+  return Boolean(e.time || e.plot || e.scene?.main || e.scene?.sub || e.nsfw);
 });
 
 const allFields = computed(() => [...coreFields, ...clothingFields, ...appearanceFields]);

@@ -1609,3 +1609,192 @@
 .meowdb-rel-detail * {
   pointer-events: auto;
 }
+
+/* ---- Brand Kit v1 components ---- */
+.meowdb-brand-banner {
+  margin: 8px 0 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(116, 149, 220, 0.35);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(131, 167, 245, 0.32), transparent 58%),
+    linear-gradient(120deg, rgba(240, 247, 255, 0.96), rgba(227, 238, 255, 0.88));
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.meowdb-brand-banner-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.meowdb-brand-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(56, 89, 161, 0.8);
+}
+
+.meowdb-brand-banner-copy h4 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: #224486;
+}
+
+.meowdb-brand-banner-copy p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(54, 77, 123, 0.8);
+}
+
+.meowdb-brand-banner-illu {
+  position: relative;
+  width: 160px;
+  min-width: 160px;
+}
+
+.meowdb-blob {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.meowdb-blob.is-a {
+  width: 84px;
+  height: 84px;
+  top: -8px;
+  right: 0;
+  background: rgba(79, 122, 220, 0.24);
+}
+
+.meowdb-blob.is-b {
+  width: 56px;
+  height: 56px;
+  top: 42px;
+  right: 58px;
+  background: rgba(194, 241, 115, 0.35);
+}
+
+.meowdb-blob.is-c {
+  width: 42px;
+  height: 42px;
+  top: 74px;
+  right: 18px;
+  background: rgba(116, 166, 235, 0.34);
+}
+
+.meowdb-pill {
+  position: absolute;
+  right: 52px;
+  top: 8px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #2f4f8d;
+  border: 1px solid rgba(112, 146, 215, 0.42);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.meowdb-rel-sticker {
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+}
+
+.meowdb-rel-sticker.is-up {
+  background: rgba(42, 195, 126, 0.16);
+  border-color: rgba(42, 195, 126, 0.36);
+  color: #17915b;
+}
+
+.meowdb-rel-sticker.is-down {
+  background: rgba(232, 91, 91, 0.14);
+  border-color: rgba(232, 91, 91, 0.35);
+  color: #be3a3a;
+}
+
+.meowdb-rel-sticker.is-manual {
+  background: rgba(79, 122, 220, 0.14);
+  border-color: rgba(79, 122, 220, 0.34);
+  color: #2f5cb4;
+}
+
+.meowdb-rel-sticker.is-neutral {
+  background: rgba(154, 171, 207, 0.16);
+  border-color: rgba(154, 171, 207, 0.34);
+  color: #50658f;
+}
+
+.meowdb-empty-state {
+  border: 1px dashed rgba(124, 150, 206, 0.45);
+  border-radius: 16px;
+  padding: 18px 14px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(250, 253, 255, 0.92), rgba(236, 244, 255, 0.8));
+}
+
+.meowdb-empty-state h4 {
+  margin: 6px 0 4px;
+  font-size: 18px;
+  color: #274782;
+}
+
+.meowdb-empty-state p {
+  margin: 0;
+  color: rgba(67, 90, 136, 0.8);
+}
+
+.meowdb-empty-illu {
+  position: relative;
+  height: 52px;
+  width: 96px;
+  margin: 0 auto;
+}
+
+.meowdb-empty-dot {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.meowdb-empty-dot.is-a {
+  width: 38px;
+  height: 38px;
+  left: 0;
+  top: 8px;
+  background: rgba(88, 132, 223, 0.24);
+}
+
+.meowdb-empty-dot.is-b {
+  width: 30px;
+  height: 30px;
+  left: 28px;
+  top: 0;
+  background: rgba(205, 241, 129, 0.4);
+}
+
+.meowdb-empty-dot.is-c {
+  width: 24px;
+  height: 24px;
+  left: 56px;
+  top: 18px;
+  background: rgba(108, 171, 238, 0.34);
+}
+
+@media (max-width: 820px) {
+  .meowdb-brand-banner {
+    flex-direction: column;
+  }
+
+  .meowdb-brand-banner-illu {
+    width: 100%;
+    min-width: 0;
+    height: 78px;
+  }
+}
