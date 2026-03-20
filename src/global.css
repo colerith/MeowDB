@@ -2682,7 +2682,7 @@
   height: 11px;
   margin-left: 0;
   margin-top: 0;
-  transform: translate(-50%, -56%) rotate(45deg);
+  transform: translate(-80%, -45%);
   transform-origin: center;
 }
 
@@ -2797,4 +2797,60 @@
   font-size: 11px;
   line-height: 1;
   color: #fff;
+}
+
+/* ==== Scoped Typography Guard (avoid ST theme leakage) ==== */
+:root {
+  --meowdb-font-ui: 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', 'Segoe UI', sans-serif;
+  --meowdb-font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Consolas', monospace;
+}
+
+.meowdb-modal,
+.meowdb-visual-shell,
+.meowdb-modal *,
+.meowdb-visual-shell * {
+  font-family: var(--meowdb-font-ui);
+}
+
+.meowdb-modal :where(h1, h2, h3, h4, h5, h6),
+.meowdb-visual-shell :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  font-weight: 760;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: #1f3257;
+}
+
+.meowdb-modal h1,
+.meowdb-visual-shell h1 {
+  font-size: 24px;
+}
+
+.meowdb-modal h2,
+.meowdb-visual-shell h2 {
+  font-size: 20px;
+}
+
+.meowdb-modal h3,
+.meowdb-visual-shell h3 {
+  font-size: 18px;
+}
+
+.meowdb-modal strong,
+.meowdb-visual-shell strong {
+  font-weight: 780;
+  color: #213966;
+}
+
+.meowdb-modal :where(h1, h2, h3, h4, h5, h6):not(.meowdb-setting-title):not(.meowdb-rel-section-title)::before,
+.meowdb-modal :where(h1, h2, h3, h4, h5, h6):not(.meowdb-setting-title):not(.meowdb-rel-section-title)::after,
+.meowdb-visual-shell :where(h1, h2, h3, h4, h5, h6):not(.meowdb-setting-title):not(.meowdb-rel-section-title)::before,
+.meowdb-visual-shell :where(h1, h2, h3, h4, h5, h6):not(.meowdb-setting-title):not(.meowdb-rel-section-title)::after {
+  content: none !important;
+}
+
+.meowdb-modal .meowdb-prompt-textarea,
+.meowdb-modal code,
+.meowdb-modal pre {
+  font-family: var(--meowdb-font-mono);
 }
