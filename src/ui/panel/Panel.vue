@@ -73,7 +73,10 @@
         </div>
 
         <div v-else-if="activeTab === 'relations'" key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
-          <section v-if="relations.length > 0" class="meowdb-rel-cards">
+          <section
+            v-if="relations.length > 0"
+            :class="['meowdb-rel-cards', relationGridClass, { 'is-scroll-x': relations.length > 8 }]"
+          >
             <article
               v-for="relation in relations"
               :key="relation.name"
@@ -83,6 +86,9 @@
               <header class="meowdb-rel-card-head">
                 <div class="meowdb-rel-name">{{ relation.name }}</div>
                 <div class="meowdb-rel-head-right">
+                  <span class="meowdb-rel-sticker" :class="getStickerClass(relation)">{{
+                    getStickerText(relation)
+                  }}</span>
                   <div class="meowdb-rel-gender">{{ relation.gender || '未知' }}</div>
                   <span class="meowdb-rel-peek">查看详情</span>
                 </div>
@@ -331,6 +337,14 @@ const paletteValues = ref<string[]>([...defaultPalette]);
 
 const relations = computed(() => entry.value?.relations ?? []);
 
+const relationGridClass = computed(() => {
+  const count = relations.value.length;
+  if (count <= 1) return 'cols-1';
+  if (count <= 4) return 'cols-2';
+  if (count <= 6) return 'cols-3';
+  return 'cols-4';
+});
+
 const selectedIndex = computed(() => {
   if (!selectedRelation.value) return -1;
   return relations.value.findIndex(item => item.name === selectedRelation.value?.name);
@@ -545,6 +559,29 @@ function summarizeAppearance(relation: CharacterRelation) {
   const parts = relation.appearanceParts;
   if (!parts) return '外貌未记录';
   return [parts.hairColor, parts.eyeColor, parts.height, parts.bodyType].filter(Boolean).join(' / ') || '外貌未记录';
+}
+
+function hasManualEdited(relation: CharacterRelation) {
+  return Object.values(relation.manualEdited ?? {}).some(Boolean);
+}
+
+function getStickerText(relation: CharacterRelation) {
+  if (hasManualEdited(relation)) return '手动锁定';
+  const delta = getFavorDelta(relation);
+  if (delta >= 0.2) return '升温';
+  if (delta <= -0.2) return '紧张';
+
+  const hint = `${relation.action ?? ''} ${relation.bond ?? ''} ${relation.personality ?? ''}`;
+  if (/观察|试探|打量|克制|防备|谨慎|沉默/.test(hint)) return '观察中';
+  return '观察中';
+}
+
+function getStickerClass(relation: CharacterRelation) {
+  const text = getStickerText(relation);
+  if (text === '手动锁定') return 'is-manual';
+  if (text === '升温') return 'is-up';
+  if (text === '紧张') return 'is-down';
+  return 'is-watch';
 }
 
 function refresh() {
