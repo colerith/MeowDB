@@ -2744,3 +2744,57 @@
   background: linear-gradient(180deg, #5f8de4, #4f79cb);
   box-shadow: 0 0 0 1px rgba(130, 160, 214, 0.2);
 }
+
+/* ==== modal scrollbar refinement ==== */
+.meowdb-modal,
+.meowdb-modal .meowdb-modal-content-shell,
+.meowdb-modal .meowdb-tab-contents {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(110, 138, 189, 0.82) rgba(214, 225, 244, 0.62);
+}
+
+.meowdb-modal::-webkit-scrollbar,
+.meowdb-modal .meowdb-modal-content-shell::-webkit-scrollbar,
+.meowdb-modal .meowdb-tab-contents::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.meowdb-modal::-webkit-scrollbar-track,
+.meowdb-modal .meowdb-modal-content-shell::-webkit-scrollbar-track,
+.meowdb-modal .meowdb-tab-contents::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(226, 235, 249, 0.75), rgba(214, 225, 244, 0.6));
+}
+
+.meowdb-modal::-webkit-scrollbar-thumb,
+.meowdb-modal .meowdb-modal-content-shell::-webkit-scrollbar-thumb,
+.meowdb-modal .meowdb-tab-contents::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid rgba(240, 245, 255, 0.96);
+  background: linear-gradient(180deg, rgba(118, 148, 205, 0.86), rgba(96, 128, 188, 0.92));
+}
+
+.meowdb-modal::-webkit-scrollbar-thumb:hover,
+.meowdb-modal .meowdb-modal-content-shell::-webkit-scrollbar-thumb:hover,
+.meowdb-modal .meowdb-tab-contents::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(106, 137, 197, 0.92), rgba(84, 118, 180, 0.96));
+}
+
+/* ==== checkbox icon via Font Awesome (modal only) ==== */
+.meowdb-modal .meowdb-check:checked::after {
+  content: '\f00c';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+}
