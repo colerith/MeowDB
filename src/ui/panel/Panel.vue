@@ -287,118 +287,113 @@
           </div>
         </div>
       </Transition>
-
-      <Transition name="meowdb-slide">
-        <aside
-          v-if="selectedRelation"
-          v-append-to-body
-          class="meowdb-rel-detail-mask"
-          @click.self="selectedRelation = null"
+      <aside
+        v-if="selectedRelation"
+        v-append-to-body
+        class="meowdb-rel-detail-mask"
+        @click.self="selectedRelation = null"
+      >
+        <article
+          class="meowdb-rel-detail"
+          @keydown.left.prevent="selectPrev"
+          @keydown.right.prevent="selectNext"
+          tabindex="0"
         >
-          <article
-            class="meowdb-rel-detail"
-            @keydown.left.prevent="selectPrev"
-            @keydown.right.prevent="selectNext"
-            tabindex="0"
-          >
-            <button class="meowdb-rel-detail-close" type="button" @click="selectedRelation = null">
-              <i class="fa-solid fa-xmark"></i>
+          <button class="meowdb-rel-detail-close" type="button" @click="selectedRelation = null">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <h3>{{ selectedRelation.name }}</h3>
+
+          <div class="meowdb-rel-detail-nav">
+            <button class="menu_button" type="button" :disabled="selectedIndex <= 0" @click="selectPrev">上一位</button>
+            <span>{{ selectedIndex + 1 }} / {{ relations.length }}</span>
+            <button
+              class="menu_button"
+              type="button"
+              :disabled="selectedIndex >= relations.length - 1"
+              @click="selectNext"
+            >
+              下一位
             </button>
-            <h3>{{ selectedRelation.name }}</h3>
+          </div>
 
-            <div class="meowdb-rel-detail-nav">
-              <button class="menu_button" type="button" :disabled="selectedIndex <= 0" @click="selectPrev">
-                上一位
-              </button>
-              <span>{{ selectedIndex + 1 }} / {{ relations.length }}</span>
-              <button
-                class="menu_button"
-                type="button"
-                :disabled="selectedIndex >= relations.length - 1"
-                @click="selectNext"
+          <div class="meowdb-rel-bulk-actions">
+            <button
+              class="menu_button"
+              type="button"
+              :disabled="pendingChanges.length === 0"
+              @click="savePendingChanges"
+            >
+              保存修改（{{ pendingChanges.length }}）
+            </button>
+            <button
+              class="menu_button"
+              type="button"
+              :disabled="manualFields.length === 0"
+              @click="restoreAllManualFields"
+            >
+              还原手动字段（{{ manualFields.length }}）
+            </button>
+          </div>
+
+          <section class="meowdb-rel-edit-section">
+            <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-id-card"></i><span>基础信息</span></h4>
+            <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-core">
+              <div
+                v-for="field in coreFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="[
+                  'meowdb-bento-cell',
+                  getFieldClass('core', field.key),
+                  { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                ]"
               >
-                下一位
-              </button>
+                <label>{{ field.label }}</label>
+                <input class="meowdb-input" :type="field.type || 'text'" v-model="draft[field.key]" />
+              </div>
             </div>
+          </section>
 
-            <div class="meowdb-rel-bulk-actions">
-              <button
-                class="menu_button"
-                type="button"
-                :disabled="pendingChanges.length === 0"
-                @click="savePendingChanges"
+          <section class="meowdb-rel-edit-section">
+            <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-shirt"></i><span>服饰拆解</span></h4>
+            <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-clothing">
+              <div
+                v-for="field in clothingFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="[
+                  'meowdb-bento-cell',
+                  getFieldClass('clothing', field.key),
+                  { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                ]"
               >
-                保存修改（{{ pendingChanges.length }}）
-              </button>
-              <button
-                class="menu_button"
-                type="button"
-                :disabled="manualFields.length === 0"
-                @click="restoreAllManualFields"
-              >
-                还原手动字段（{{ manualFields.length }}）
-              </button>
+                <label>{{ field.label }}</label>
+                <input class="meowdb-input" v-model="draft[field.key]" />
+              </div>
             </div>
+          </section>
 
-            <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-id-card"></i><span>基础信息</span></h4>
-              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-core">
-                <div
-                  v-for="field in coreFields"
-                  :key="field.key"
-                  class="meowdb-edit-cell"
-                  :class="[
-                    'meowdb-bento-cell',
-                    getFieldClass('core', field.key),
-                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
-                  ]"
-                >
-                  <label>{{ field.label }}</label>
-                  <input class="meowdb-input" :type="field.type || 'text'" v-model="draft[field.key]" />
-                </div>
+          <section class="meowdb-rel-edit-section">
+            <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-user"></i><span>外貌拆解</span></h4>
+            <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-appearance">
+              <div
+                v-for="field in appearanceFields"
+                :key="field.key"
+                class="meowdb-edit-cell"
+                :class="[
+                  'meowdb-bento-cell',
+                  getFieldClass('appearance', field.key),
+                  { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
+                ]"
+              >
+                <label>{{ field.label }}</label>
+                <input class="meowdb-input" v-model="draft[field.key]" />
               </div>
-            </section>
-
-            <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-shirt"></i><span>服饰拆解</span></h4>
-              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-clothing">
-                <div
-                  v-for="field in clothingFields"
-                  :key="field.key"
-                  class="meowdb-edit-cell"
-                  :class="[
-                    'meowdb-bento-cell',
-                    getFieldClass('clothing', field.key),
-                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
-                  ]"
-                >
-                  <label>{{ field.label }}</label>
-                  <input class="meowdb-input" v-model="draft[field.key]" />
-                </div>
-              </div>
-            </section>
-
-            <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-user"></i><span>外貌拆解</span></h4>
-              <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-appearance">
-                <div
-                  v-for="field in appearanceFields"
-                  :key="field.key"
-                  class="meowdb-edit-cell"
-                  :class="[
-                    'meowdb-bento-cell',
-                    getFieldClass('appearance', field.key),
-                    { 'is-manual': isFieldManual(field.key), 'is-pending': isFieldPending(field.key) },
-                  ]"
-                >
-                  <label>{{ field.label }}</label>
-                  <input class="meowdb-input" v-model="draft[field.key]" />
-                </div>
-              </div>
-            </section>
-          </article>
-        </aside>
-      </Transition>
+            </div>
+          </section>
+        </article>
+      </aside>
     </template>
   </section>
 </template>
