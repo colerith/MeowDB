@@ -3048,29 +3048,17 @@
 
 .meowdb-todo-grid {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 10px;
 }
 
 .meowdb-todo-card {
-  grid-column: span 4;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid rgba(130, 158, 208, 0.28);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(241, 247, 255, 0.9));
-}
-
-.meowdb-todo-card.is-q1 {
-  grid-column: span 6;
-}
-
-.meowdb-todo-card.is-q2 {
-  grid-column: span 4;
-}
-
-.meowdb-todo-card.is-q3,
-.meowdb-todo-card.is-q4 {
-  grid-column: span 3;
+  display: grid;
+  gap: 6px;
 }
 
 .meowdb-todo-card-head {
@@ -3078,13 +3066,56 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
 .meowdb-todo-card-head h4 {
   margin: 0;
   font-size: 15px;
   font-weight: 760;
+}
+
+.meowdb-todo-tags {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.meowdb-quad-tag,
+.meowdb-priority-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.meowdb-quad-tag.is-q1 {
+  color: #7f3550;
+  background: rgba(219, 170, 190, 0.25);
+  border-color: rgba(194, 127, 154, 0.45);
+}
+
+.meowdb-quad-tag.is-q2 {
+  color: #7a4f22;
+  background: rgba(232, 200, 150, 0.28);
+  border-color: rgba(210, 169, 106, 0.45);
+}
+
+.meowdb-quad-tag.is-q3 {
+  color: #2e6b5c;
+  background: rgba(154, 210, 189, 0.24);
+  border-color: rgba(108, 182, 158, 0.45);
+}
+
+.meowdb-quad-tag.is-q4 {
+  color: #2f4f7d;
+  background: rgba(166, 191, 229, 0.24);
+  border-color: rgba(122, 158, 210, 0.45);
+}
+
+.meowdb-priority-tag {
+  color: #3b517a;
+  background: rgba(188, 206, 236, 0.24);
+  border-color: rgba(134, 165, 214, 0.45);
 }
 
 .meowdb-todo-line {
@@ -3099,17 +3130,16 @@
   color: #2f4775;
 }
 
+.meowdb-todo-card-foot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
 @media (max-width: 980px) {
   .meowdb-todo-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .meowdb-todo-card,
-  .meowdb-todo-card.is-q1,
-  .meowdb-todo-card.is-q2,
-  .meowdb-todo-card.is-q3,
-  .meowdb-todo-card.is-q4 {
-    grid-column: span 6;
   }
 }
 
@@ -3123,12 +3153,8 @@
     grid-template-columns: 1fr;
   }
 
-  .meowdb-todo-card,
-  .meowdb-todo-card.is-q1,
-  .meowdb-todo-card.is-q2,
-  .meowdb-todo-card.is-q3,
-  .meowdb-todo-card.is-q4 {
-    grid-column: span 12;
+  .meowdb-todo-grid {
+    grid-template-columns: 1fr;
   }
 }
 

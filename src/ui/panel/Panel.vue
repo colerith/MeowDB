@@ -208,7 +208,17 @@
                 <input class="meowdb-input" v-model.trim="todoForm.note" placeholder="备注" />
               </div>
               <div class="meowdb-todo-form-actions">
-                <button class="menu_button meowdb-tool-btn" type="button" @click="addTodoItem">保存待办</button>
+                <button class="menu_button meowdb-tool-btn" type="button" @click="saveTodoItem">
+                  {{ editingTodoIndex === null ? '保存待办' : '更新待办' }}
+                </button>
+                <button
+                  v-if="editingTodoIndex !== null"
+                  class="menu_button meowdb-tool-btn"
+                  type="button"
+                  @click="clearTodoForm"
+                >
+                  取消编辑
+                </button>
               </div>
             </div>
 
@@ -217,14 +227,21 @@
                 v-for="(todo, index) in todoItems"
                 :key="`${todo.title}-${index}`"
                 class="meowdb-todo-card"
-                :class="[`is-${todo.quadrant.toLowerCase()}`, `is-${todo.aiPriority.toLowerCase()}`]"
+                draggable="true"
+                @dragstart="onTodoDragStart(index)"
+                @dragover.prevent
+                @drop="onTodoDrop(index)"
               >
                 <header class="meowdb-todo-card-head">
                   <h4>{{ todo.title }}</h4>
-                  <span class="meowdb-echo-status" :class="todo.status === '已完成' ? 'is-done' : 'is-pending'">{{
-                    todo.status
-                  }}</span>
+                  <span class="meowdb-echo-status" :class="todo.status === '已完成' ? 'is-done' : 'is-pending'">
+                    {{ todo.status }}
+                  </span>
                 </header>
+                <div class="meowdb-todo-tags">
+                  <span class="meowdb-quad-tag" :class="`is-${todo.quadrant.toLowerCase()}`">{{ todo.quadrant }}</span>
+                  <span class="meowdb-priority-tag">{{ todo.aiPriority }}</span>
+                </div>
                 <p class="meowdb-todo-line">
                   <b>预计：</b><span>{{ todo.eta || '未设置' }}</span>
                 </p>
@@ -232,11 +249,14 @@
                   <b>参与：</b><span>{{ formatParticipants(todo.participants) }}</span>
                 </p>
                 <p class="meowdb-todo-line">
-                  <b>等级：</b><span>{{ todo.quadrant }} · {{ todo.aiPriority }}</span>
-                </p>
-                <p class="meowdb-todo-line">
                   <b>备注：</b><span>{{ todo.note || '无' }}</span>
                 </p>
+                <footer class="meowdb-todo-card-foot">
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="startEditTodo(index)">编辑</button>
+                  <button class="menu_button meowdb-tool-btn danger" type="button" @click="removeTodoItem(index)">
+                    删除
+                  </button>
+                </footer>
               </article>
             </div>
 
@@ -434,6 +454,8 @@ const updating = ref(false);
 const selectedRelation = ref<CharacterRelation | null>(null);
 const draft = reactive<Record<string, string>>({});
 const showTodoForm = ref(false);
+const editingTodoIndex = ref<number | null>(null);
+const draggingTodoIndex = ref<number | null>(null);
 const todoForm = reactive({
   title: '',
   eta: '',
@@ -451,9 +473,7 @@ const relations = computed(() => entry.value?.relations ?? []);
 const echoes = computed(() => entry.value?.echoes ?? []);
 const todos = computed(() => entry.value?.todos ?? []);
 const echoItems = computed<Echo[]>(() => echoes.value.slice(0, 10));
-const todoItems = computed<Todo[]>(() => {
-  return [...todos.value].slice(0, 10).sort((a, b) => todoPriorityRank(a.aiPriority) - todoPriorityRank(b.aiPriority));
-});
+const todoItems = computed<Todo[]>(() => [...todos.value].slice(0, 10));
 
 function getEchoStatusText(echo: Echo): '未完成' | '完成' {
   return echo.status === '完成' ? '完成' : '未完成';
@@ -472,11 +492,11 @@ function formatParticipants(list: string[]) {
   return list.filter(Boolean).join(' / ');
 }
 
-function todoPriorityRank(priority: Todo['aiPriority']) {
-  if (priority === 'P0') return 0;
-  if (priority === 'P1') return 1;
-  if (priority === 'P2') return 2;
-  return 3;
+function getPriorityByQuadrant(quadrant: Todo['quadrant']): Todo['aiPriority'] {
+  if (quadrant === 'Q1') return 'P1';
+  if (quadrant === 'Q2') return 'P2';
+  if (quadrant === 'Q3') return 'P3';
+  return 'P3';
 }
 
 const relationGridClass = computed(() => {
@@ -737,7 +757,76 @@ function toggleTodoForm() {
   showTodoForm.value = !showTodoForm.value;
 }
 
-async function addTodoItem() {
+function buildTodoFromForm(): Todo {
+  const participants = todoForm.participants
+    .split(/[，,]/)
+    .map(item => item.trim())
+    .filter(Boolean);
+
+  return {
+    title: todoForm.title.trim(),
+    eta: todoForm.eta.trim(),
+    participants,
+    note: todoForm.note.trim(),
+    quadrant: todoForm.quadrant,
+    aiPriority: getPriorityByQuadrant(todoForm.quadrant),
+    status: todoForm.status,
+  };
+}
+
+function clearTodoForm() {
+  todoForm.title = '';
+  todoForm.eta = '';
+  todoForm.participants = '';
+  todoForm.note = '';
+  todoForm.quadrant = 'Q2';
+  todoForm.status = '待执行';
+  editingTodoIndex.value = null;
+  showTodoForm.value = false;
+}
+
+function startEditTodo(index: number) {
+  const todo = todoItems.value[index];
+  if (!todo) return;
+  todoForm.title = todo.title;
+  todoForm.eta = todo.eta;
+  todoForm.participants = (todo.participants ?? []).join(', ');
+  todoForm.note = todo.note;
+  todoForm.quadrant = todo.quadrant;
+  todoForm.status = todo.status;
+  editingTodoIndex.value = index;
+  showTodoForm.value = true;
+}
+
+async function removeTodoItem(index: number) {
+  if (!entry.value) return;
+  const list = [...(entry.value.todos ?? [])];
+  if (index < 0 || index >= list.length) return;
+  list.splice(index, 1);
+  entry.value.todos = list;
+  await persistEntry();
+}
+
+function onTodoDragStart(index: number) {
+  draggingTodoIndex.value = index;
+}
+
+async function onTodoDrop(index: number) {
+  if (!entry.value) return;
+  const from = draggingTodoIndex.value;
+  draggingTodoIndex.value = null;
+  if (from === null || from === index) return;
+
+  const list = [...(entry.value.todos ?? [])];
+  const [moved] = list.splice(from, 1);
+  if (!moved) return;
+  list.splice(index, 0, moved);
+
+  entry.value.todos = list;
+  await persistEntry();
+}
+
+async function saveTodoItem() {
   if (!entry.value) return;
   const title = todoForm.title.trim();
   if (!title) {
@@ -746,36 +835,21 @@ async function addTodoItem() {
   }
 
   const list = [...(entry.value.todos ?? [])].slice(0, 10);
-  if (list.length >= 10) {
+  if (editingTodoIndex.value === null && list.length >= 10) {
     toastr.warning('待办上限为 10 条');
     return;
   }
 
-  const participants = todoForm.participants
-    .split(/[，,]/)
-    .map(item => item.trim())
-    .filter(Boolean);
-
-  list.push({
-    title,
-    eta: todoForm.eta.trim(),
-    participants,
-    note: todoForm.note.trim(),
-    quadrant: todoForm.quadrant,
-    aiPriority: todoForm.quadrant === 'Q1' ? 'P1' : todoForm.quadrant === 'Q2' ? 'P2' : 'P3',
-    status: todoForm.status,
-  });
+  const next = buildTodoFromForm();
+  if (editingTodoIndex.value === null) {
+    list.push(next);
+  } else if (editingTodoIndex.value >= 0 && editingTodoIndex.value < list.length) {
+    list[editingTodoIndex.value] = next;
+  }
 
   entry.value.todos = list;
   await persistEntry();
-
-  todoForm.title = '';
-  todoForm.eta = '';
-  todoForm.participants = '';
-  todoForm.note = '';
-  todoForm.quadrant = 'Q2';
-  todoForm.status = '待执行';
-  showTodoForm.value = false;
+  clearTodoForm();
 }
 function refresh() {
   entry.value = getCurrentEntry();
