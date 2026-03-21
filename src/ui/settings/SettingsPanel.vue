@@ -1,8 +1,8 @@
-﻿<template>
+<template>
   <div class="meowdb-drawer-body">
     <div class="drawer-header">
       <div class="meowdb-title">
-        <i class="fa-solid fa-table-cells-large"></i>
+        <i class="fa-solid fa-paw"></i>
         MeowDB 喵喵表格
       </div>
       <span class="meowdb-version">v0.3</span>

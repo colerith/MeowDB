@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="meowdb-visual-shell" :class="{ 'is-collapsed': panelCollapsed }">
     <header class="meowdb-visual-header">
       <div
@@ -9,6 +9,7 @@
         @keydown.enter.prevent="toggleCollapse"
         @keydown.space.prevent="toggleCollapse"
       >
+        <i class="fa-solid fa-paw meowdb-brand-icon" aria-hidden="true"></i>
         <h3>MeowDB 喵喵表格</h3>
         <span class="meowdb-serial-badge">{{ entry?.serial || '未编号' }}</span>
       </div>
@@ -44,19 +45,19 @@
         <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
           <div v-if="hasStatusData" class="meowdb-card-grid">
             <article class="meowdb-card">
-              <h4><strong>当前时间</strong></h4>
+              <h4 class="meowdb-status-title"><strong>当前时间</strong></h4>
               <p>{{ entry?.time || '未设置' }}</p>
             </article>
             <article class="meowdb-card">
-              <h4><strong>当前地点</strong></h4>
+              <h4 class="meowdb-status-title"><strong>当前地点</strong></h4>
               <p>{{ sceneText }}</p>
             </article>
             <article class="meowdb-card">
-              <h4><strong>剧情摘要</strong></h4>
+              <h4 class="meowdb-status-title"><strong>剧情摘要</strong></h4>
               <p>{{ entry?.plot || '暂无摘要' }}</p>
             </article>
             <article class="meowdb-card">
-              <h4><strong>NSFW 进度</strong></h4>
+              <h4 class="meowdb-status-title"><strong>NSFW 进度</strong></h4>
               <p>{{ nsfwText }}</p>
             </article>
           </div>

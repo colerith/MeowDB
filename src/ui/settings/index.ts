@@ -1,4 +1,4 @@
-﻿import SettingsPanel from '@/ui/settings/SettingsPanel.vue';
+import SettingsPanel from '@/ui/settings/SettingsPanel.vue';
 
 const TOP_DRAWER_ID = 'MeowDB_drawer';
 const TOP_ICON_ID = 'MeowDB_drawer_icon';
@@ -30,7 +30,7 @@ function ensureTopDrawer(holder: HTMLElement): HTMLElement {
     drawer.className = 'drawer';
     drawer.innerHTML = `
       <div class="drawer-toggle">
-        <div id="${TOP_ICON_ID}" class="drawer-icon fa-solid fa-table-cells-large fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
+        <div id="${TOP_ICON_ID}" class="drawer-icon fa-solid fa-paw fa-fw closedIcon interactable" title="MeowDB 设置" tabindex="0" role="button"></div>
       </div>
       <div id="${TOP_DUMMY_CONTENT_ID}" class="drawer-content closedDrawer meowdb-dummy-drawer"></div>
     `;
