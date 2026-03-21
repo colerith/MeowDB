@@ -46,6 +46,7 @@ export const CharacterRelationSchema = z.object({
 export const EchoSchema = z.object({
   character: z.string().trim().min(1),
   content: z.string().trim().min(1),
+  status: z.enum(['未完成', '完成']).default('未完成'),
 });
 
 export const ArchivedNPCSchema = z.object({

@@ -34,7 +34,7 @@
           关系
         </button>
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'echoes' }" @click="activeTab = 'echoes'">
-          Echo
+          承诺
         </button>
         <button class="meowdb-tab" disabled>物品</button>
         <button class="meowdb-tab" disabled>场景</button>
@@ -160,7 +160,7 @@
 
         <div v-else-if="activeTab === 'echoes'" key="echoes" class="meowdb-tab-panel meowdb-echo-wrap">
           <div class="meowdb-echo-head">
-            <b>Echo 池（{{ echoItems.length }}/10）</b>
+            <b>承诺池（{{ echoItems.length }}/10）</b>
             <span>优先兑现旧承诺，完成即清理</span>
           </div>
 
@@ -169,12 +169,13 @@
               <span class="meowdb-echo-index">#{{ index + 1 }}</span>
               <span class="meowdb-echo-name">[{{ echo.character }}]</span>
               <span class="meowdb-echo-content">{{ echo.content }}</span>
+              <span class="meowdb-echo-status" :class="getEchoStatusClass(echo)">{{ getEchoStatusText(echo) }}</span>
             </li>
           </ul>
 
           <div v-else class="meowdb-empty-state meowdb-empty-state-echo">
-            <h4>暂无 Echo 条目</h4>
-            <p>执行 AI 更新后会在这里维护待回收承诺。</p>
+            <h4>暂无承诺条目</h4>
+            <p>执行 AI 更新后会在这里维护承诺状态与清理节奏。</p>
           </div>
         </div>
 
@@ -369,6 +370,13 @@ const paletteValues = ref<string[]>([...defaultPalette]);
 const relations = computed(() => entry.value?.relations ?? []);
 const echoes = computed(() => entry.value?.echoes ?? []);
 const echoItems = computed<Echo[]>(() => echoes.value.slice(0, 10));
+function getEchoStatusText(echo: Echo): '未完成' | '完成' {
+  return echo.status === '完成' ? '完成' : '未完成';
+}
+
+function getEchoStatusClass(echo: Echo) {
+  return getEchoStatusText(echo) === '完成' ? 'is-done' : 'is-pending';
+}
 
 const relationGridClass = computed(() => {
   const count = relations.value.length;
@@ -523,8 +531,8 @@ function normalizeTab(tab: string | undefined): VisualTab {
 const serialDisplay = computed(() => {
   const raw = entry.value?.serial ?? '';
   const matched = raw.match(/(\d+)(?!.*\d)/);
-  if (!matched) return '【---】';
-  return `【${matched[1].padStart(3, '0')}】`;
+  if (!matched) return '---';
+  return matched[1].padStart(3, '0');
 });
 
 function toggleCollapse() {

@@ -1,4 +1,4 @@
-import type { MeowDBEntry } from '@/type/meowdb';
+﻿import type { MeowDBEntry } from '@/type/meowdb';
 
 export const sampleEntry: MeowDBEntry = {
   serial: '🐾喵喵摘要-001',
@@ -137,14 +137,17 @@ export const sampleEntry: MeowDBEntry = {
     {
       character: 'Ghost - 婚后',
       content: '周末一起整理婚礼相册并挑选装裱照片。',
+      status: '未完成',
     },
     {
       character: '<user>',
-      content: '下次争执时先说出真实需求，不用冷处理。',
+      content: '下次争执时先说出真实需求，不再冷处理。',
+      status: '未完成',
     },
     {
       character: 'Ghost - 婚后',
-      content: '在一周内确认蜜月后共同预算与行程。',
+      content: '确认蜜月后的共同预算与行程。',
+      status: '完成',
     },
   ],
   archived: [

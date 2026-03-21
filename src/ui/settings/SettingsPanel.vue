@@ -224,7 +224,7 @@
             <textarea
               class="meowdb-input meowdb-prompt-textarea"
               v-model="settings.relations_prompt"
-              rows="18"
+              rows="10"
               placeholder="留空将使用默认 relations 提示词"
             />
 
@@ -237,8 +237,8 @@
           <section class="meowdb-prompt-card">
             <header class="meowdb-prompt-card-head">
               <div>
-                <h4>Echoes 更新提示词</h4>
-                <p>用于维护承诺回收池（优先兑现旧承诺，完成即清理）。</p>
+                <h4>承诺 更新提示词</h4>
+                <p>用于维护承诺池（根据状态处理、实现与清理）。</p>
               </div>
               <button class="menu_button meowdb-tool-btn" type="button" @click="restoreEchoesPrompt">恢复默认</button>
             </header>
@@ -246,8 +246,8 @@
             <textarea
               class="meowdb-input meowdb-prompt-textarea"
               v-model="settings.echoes_prompt"
-              rows="12"
-              placeholder="留空将使用默认 echoes 提示词"
+              rows="8"
+              placeholder="留空将使用默认承诺提示词"
             />
 
             <div class="meowdb-prompt-meta">
@@ -590,5 +590,8 @@ watch(
 onMounted(() => {
   ensureProfiles();
   applyProfileToFields(activeProfile.value);
+
+  if (!settings.value.relations_prompt?.trim()) settings.value.relations_prompt = DEFAULT_RELATIONS_PROMPT;
+  if (!settings.value.echoes_prompt?.trim()) settings.value.echoes_prompt = DEFAULT_ECHOES_PROMPT;
 });
 </script>
