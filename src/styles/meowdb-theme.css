@@ -1,4 +1,4 @@
-﻿/* MeowDB Theme Tokens & Guardrail (v1) */
+/* MeowDB Theme Tokens & Guardrail (v1) */
 :root {
   --meowdb-font-ui: 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', 'Segoe UI', sans-serif;
   --meowdb-font-mono: 'JetBrains Mono', 'SFMono-Regular', 'Consolas', monospace;
@@ -22,12 +22,27 @@
 }
 
 /* scope typography */
+
 .meowdb-modal,
 .meowdb-visual-shell,
 .meowdb-modal *,
 .meowdb-visual-shell * {
   font-family: var(--meowdb-font-ui) !important;
 }
+
+
+
+/* Keep Font Awesome icons from being overridden by the scoped font reset. */
+.meowdb-modal :is(.fa, .fa-solid, .fa-regular)::before,
+.meowdb-visual-shell :is(.fa, .fa-solid, .fa-regular)::before {
+  font-family: 'Font Awesome 6 Free' !important;
+}
+
+.meowdb-modal :is(.fa-brands)::before,
+.meowdb-visual-shell :is(.fa-brands)::before {
+  font-family: 'Font Awesome 6 Brands' !important;
+}
+
 
 .meowdb-modal code,
 .meowdb-modal pre,
