@@ -123,15 +123,12 @@
               </footer>
             </article>
           </section>
-          <div v-else class="meowdb-empty-state meowdb-empty-state-rel">
-            <div class="meowdb-empty-illu" aria-hidden="true">
-              <span class="meowdb-empty-dot is-a"></span>
-              <span class="meowdb-empty-dot is-b"></span>
-              <span class="meowdb-empty-dot is-c"></span>
-            </div>
-            <h4>暂无关系数据</h4>
-            <p>请先执行 AI 更新，或在 relations_json 中写入角色关系。</p>
-          </div>
+          <UnifiedEmptyState
+            v-else
+            title="暂无关系数据"
+            description="请先执行 AI 更新，或在 relations_json 中写入角色关系。"
+            extra-class="meowdb-empty-state-rel"
+          />
 
           <details v-if="relations.length > 0" class="meowdb-rel-graph-collapse">
             <summary>
@@ -168,15 +165,24 @@
             <li v-for="(echo, index) in echoItems" :key="`${echo.character}-${index}`" class="meowdb-echo-item">
               <span class="meowdb-echo-index">#{{ index + 1 }}</span>
               <span class="meowdb-echo-name">[{{ echo.character }}]</span>
-              <span class="meowdb-echo-content">{{ echo.content }}</span>
+              <div class="meowdb-echo-body">
+                <p class="meowdb-echo-line">
+                  <b>承诺：</b><span>{{ getEchoPromise(echo) }}</span>
+                </p>
+                <p class="meowdb-echo-line">
+                  <b>待办：</b><span>{{ getEchoTodo(echo) }}</span>
+                </p>
+              </div>
               <span class="meowdb-echo-status" :class="getEchoStatusClass(echo)">{{ getEchoStatusText(echo) }}</span>
             </li>
           </ul>
 
-          <div v-else class="meowdb-empty-state meowdb-empty-state-echo">
-            <h4>暂无承诺条目</h4>
-            <p>执行 AI 更新后会在这里维护承诺状态与清理节奏。</p>
-          </div>
+          <UnifiedEmptyState
+            v-else
+            title="暂无承诺条目"
+            description="执行 AI 更新后会在这里维护承诺状态与清理节奏。"
+            extra-class="meowdb-empty-state-echo"
+          />
         </div>
 
         <div v-else key="settings" class="meowdb-tab-panel">
@@ -309,6 +315,7 @@
 import { runManualAiUpdate } from '@/modules/ai-updater';
 import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
+import UnifiedEmptyState from '@/ui/components/UnifiedEmptyState.vue';
 import type { CharacterRelation, Echo } from '@/type/meowdb';
 import { storeToRefs } from 'pinia';
 
@@ -378,6 +385,13 @@ function getEchoStatusClass(echo: Echo) {
   return getEchoStatusText(echo) === '完成' ? 'is-done' : 'is-pending';
 }
 
+function getEchoPromise(echo: Echo): string {
+  return echo.promise?.trim() || echo.content?.trim() || '（未填写承诺）';
+}
+
+function getEchoTodo(echo: Echo): string {
+  return echo.todo?.trim() || '（暂无待办）';
+}
 const relationGridClass = computed(() => {
   const count = relations.value.length;
   if (count <= 1) return 'cols-1';

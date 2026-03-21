@@ -45,7 +45,9 @@ export const CharacterRelationSchema = z.object({
 
 export const EchoSchema = z.object({
   character: z.string().trim().min(1),
-  content: z.string().trim().min(1),
+  promise: z.string().default(''),
+  todo: z.string().default(''),
+  content: z.string().trim().default(''),
   status: z.enum(['未完成', '完成']).default('未完成'),
 });
 

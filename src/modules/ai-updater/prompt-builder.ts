@@ -38,17 +38,19 @@ export const DEFAULT_RELATIONS_PROMPT = [
 export const DEFAULT_ECHOES_PROMPT = [
   'echoes_json 结构要求（数组，上限 10 条）：',
   '- character: 角色名',
-  '- content: 待回收的关键承诺',
+  '- promise: 承诺本体（明确要兑现什么）',
+  '- todo: 下一步待办（具体可执行动作）',
   '- status: 承诺状态，只能是“未完成”或“完成”',
+  '- content: 兼容旧字段，可选；新数据优先写 promise/todo',
   '',
   'echoes:',
   ' (上限10条，优先兑现旧承诺，完成即清理)',
-  '- [角色名]：[待回收的关键承诺]（status=未完成|完成）',
+  '- [角色名]：承诺=[...]；待办=[...]；status=未完成|完成',
   '',
   '处理规则（仅允许这三类操作）：',
-  '- 处理/实现：旧承诺仍在推进时可更新描述，但 status 仍为“未完成”',
-  '- 完成：承诺已兑现时先标记为“完成”',
-  '- 清理：已完成或已失效承诺从 echoes_json 中移除',
+  '- 处理：承诺仍在推进，完善 promise/todo，status 保持“未完成”',
+  '- 实现：承诺已兑现，status 改为“完成”',
+  '- 清理：已完成或失效承诺从 echoes_json 移除',
   '- 禁止空泛情绪条目，必须是可追踪、可验证的承诺动作',
 ].join('\n');
 
@@ -97,7 +99,7 @@ export function buildPrompt(
     '- time 反映当前轮次时间描述',
     '- 根据剧情更新 scene / plot / relations / echoes / enigmas / seeds',
     '- 优先保证 relations_json 字段完整、可直接用于前端卡片展示',
-    '- echoes_json 仅保留未完成承诺，完成或失效后清理，最多 10 条',
+    '- echoes_json 维护承诺+待办：未完成保留并细化、完成后清理，最多 10 条',
     '- echoes_json 的 status 字段只能是“未完成”或“完成”',
     '- 对 manualEdited=true 的字段，默认保持值不变',
   ].join('\n');

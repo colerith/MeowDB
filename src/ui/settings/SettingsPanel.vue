@@ -213,7 +213,7 @@
           <section class="meowdb-prompt-card">
             <header class="meowdb-prompt-card-head">
               <div>
-                <h4>Relations 更新提示词</h4>
+                <h4>关系 更新提示词</h4>
                 <p>用于 AI 更新角色关系、服饰/外貌拆解和手动字段保护逻辑。</p>
               </div>
               <button class="menu_button meowdb-tool-btn" type="button" @click="restoreRelationsPrompt">

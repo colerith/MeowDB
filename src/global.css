@@ -2961,9 +2961,9 @@
 
 .meowdb-echo-item {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: 48px 180px 1fr auto;
   align-items: start;
-  gap: 8px;
+  gap: 10px;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid rgba(130, 158, 208, 0.28);
@@ -2974,6 +2974,41 @@
   font-size: 12px;
   font-weight: 760;
   color: #3c5f9c;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.meowdb-echo-name {
+  font-size: 13px;
+  font-weight: 760;
+  color: #2f4b80;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+
+.meowdb-echo-body {
+  display: grid;
+  gap: 4px;
+}
+
+.meowdb-echo-line {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #2d3953;
+}
+
+.meowdb-echo-line b {
+  flex: 0 0 auto;
+  color: #2f4775;
+  font-weight: 700;
+}
+
+.meowdb-echo-line span {
+  flex: 1 1 auto;
 }
 
 .meowdb-echo-content {

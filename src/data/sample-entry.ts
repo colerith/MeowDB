@@ -136,16 +136,22 @@ export const sampleEntry: MeowDBEntry = {
   echoes: [
     {
       character: 'Ghost - 婚后',
+      promise: '周末一起整理婚礼相册并挑选装裱照片。',
+      todo: '周六晚饭后一起筛选 30 张照片并确定 5 张装裱候选。',
       content: '周末一起整理婚礼相册并挑选装裱照片。',
       status: '未完成',
     },
     {
       character: '<user>',
+      promise: '下次争执时先说出真实需求，不再冷处理。',
+      todo: '发生分歧时先用 1 句话表达核心需求，再讨论解决方案。',
       content: '下次争执时先说出真实需求，不再冷处理。',
       status: '未完成',
     },
     {
       character: 'Ghost - 婚后',
+      promise: '确认蜜月后的共同预算与行程。',
+      todo: '已完成预算清单与行程确认，无后续待办。',
       content: '确认蜜月后的共同预算与行程。',
       status: '完成',
     },
