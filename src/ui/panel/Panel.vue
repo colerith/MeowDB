@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="meowdb-visual-shell" :class="{ 'is-collapsed': panelCollapsed }">
     <header class="meowdb-visual-header">
       <div
@@ -11,7 +11,7 @@
       >
         <i class="fa-solid fa-paw meowdb-brand-icon" aria-hidden="true"></i>
         <h3>MeowDB 喵喵表格</h3>
-        <span class="meowdb-serial-badge">{{ entry?.serial || '未编号' }}</span>
+        <span class="meowdb-serial-badge">{{ serialDisplay }}</span>
       </div>
       <div class="meowdb-header-actions">
         <button class="menu_button meowdb-action-btn" :disabled="updating" @click="refresh">
@@ -33,7 +33,9 @@
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'relations' }" @click="activeTab = 'relations'">
           关系
         </button>
-        <button class="meowdb-tab" disabled>时间线</button>
+        <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'echoes' }" @click="activeTab = 'echoes'">
+          Echo
+        </button>
         <button class="meowdb-tab" disabled>物品</button>
         <button class="meowdb-tab" disabled>场景</button>
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'settings' }" @click="activeTab = 'settings'">
@@ -45,19 +47,27 @@
         <div v-if="activeTab === 'status'" key="status" class="meowdb-tab-panel">
           <div v-if="hasStatusData" class="meowdb-card-grid">
             <article class="meowdb-card">
-              <h4 class="meowdb-status-title"><strong>当前时间</strong></h4>
+              <h4 class="meowdb-status-title">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i><strong>当前时间</strong>
+              </h4>
               <p>{{ entry?.time || '未设置' }}</p>
             </article>
             <article class="meowdb-card">
-              <h4 class="meowdb-status-title"><strong>当前地点</strong></h4>
+              <h4 class="meowdb-status-title">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i><strong>当前地点</strong>
+              </h4>
               <p>{{ sceneText }}</p>
             </article>
             <article class="meowdb-card">
-              <h4 class="meowdb-status-title"><strong>剧情摘要</strong></h4>
+              <h4 class="meowdb-status-title">
+                <i class="fa-regular fa-note-sticky" aria-hidden="true"></i><strong>剧情摘要</strong>
+              </h4>
               <p>{{ entry?.plot || '暂无摘要' }}</p>
             </article>
             <article class="meowdb-card">
-              <h4 class="meowdb-status-title"><strong>NSFW 进度</strong></h4>
+              <h4 class="meowdb-status-title">
+                <i class="fa-solid fa-temperature-three-quarters" aria-hidden="true"></i><strong>NSFW 进度</strong>
+              </h4>
               <p>{{ nsfwText }}</p>
             </article>
           </div>
@@ -148,6 +158,26 @@
           </details>
         </div>
 
+        <div v-else-if="activeTab === 'echoes'" key="echoes" class="meowdb-tab-panel meowdb-echo-wrap">
+          <div class="meowdb-echo-head">
+            <b>Echo 池（{{ echoItems.length }}/10）</b>
+            <span>优先兑现旧承诺，完成即清理</span>
+          </div>
+
+          <ul v-if="echoItems.length > 0" class="meowdb-echo-list">
+            <li v-for="(echo, index) in echoItems" :key="`${echo.character}-${index}`" class="meowdb-echo-item">
+              <span class="meowdb-echo-index">#{{ index + 1 }}</span>
+              <span class="meowdb-echo-name">[{{ echo.character }}]</span>
+              <span class="meowdb-echo-content">{{ echo.content }}</span>
+            </li>
+          </ul>
+
+          <div v-else class="meowdb-empty-state meowdb-empty-state-echo">
+            <h4>暂无 Echo 条目</h4>
+            <p>执行 AI 更新后会在这里维护待回收承诺。</p>
+          </div>
+        </div>
+
         <div v-else key="settings" class="meowdb-tab-panel">
           <div class="meowdb-palette-card">
             <div class="meowdb-palette-head">
@@ -212,7 +242,7 @@
             </div>
 
             <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-id-card"></i><span>基础信息</span></h4>
+              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-id-card"></i><span>基础信息</span></h4>
               <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-core">
                 <div
                   v-for="field in coreFields"
@@ -231,7 +261,7 @@
             </section>
 
             <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-shirt"></i><span>服饰拆解</span></h4>
+              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-shirt"></i><span>服饰拆解</span></h4>
               <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-clothing">
                 <div
                   v-for="field in clothingFields"
@@ -250,7 +280,7 @@
             </section>
 
             <section class="meowdb-rel-edit-section">
-              <h4 class="meowdb-rel-section-title"><i class="fa-solid fa-user"></i><span>外貌拆解</span></h4>
+              <h4 class="meowdb-rel-detail-title"><i class="fa-solid fa-user"></i><span>外貌拆解</span></h4>
               <div class="meowdb-rel-edit-grid meowdb-bento-grid meowdb-bento-appearance">
                 <div
                   v-for="field in appearanceFields"
@@ -278,10 +308,10 @@
 import { runManualAiUpdate } from '@/modules/ai-updater';
 import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
-import type { CharacterRelation } from '@/type/meowdb';
+import type { CharacterRelation, Echo } from '@/type/meowdb';
 import { storeToRefs } from 'pinia';
 
-type VisualTab = 'status' | 'relations' | 'settings';
+type VisualTab = 'status' | 'relations' | 'echoes' | 'settings';
 
 interface EditableField {
   key: string;
@@ -337,6 +367,8 @@ const panelCollapsed = ref(Boolean(settings.value.visual_panel_collapsed));
 const paletteValues = ref<string[]>([...defaultPalette]);
 
 const relations = computed(() => entry.value?.relations ?? []);
+const echoes = computed(() => entry.value?.echoes ?? []);
+const echoItems = computed<Echo[]>(() => echoes.value.slice(0, 10));
 
 const relationGridClass = computed(() => {
   const count = relations.value.length;
@@ -484,9 +516,16 @@ watch(
 );
 
 function normalizeTab(tab: string | undefined): VisualTab {
-  if (tab === 'relations' || tab === 'settings' || tab === 'status') return tab;
+  if (tab === 'relations' || tab === 'echoes' || tab === 'settings' || tab === 'status') return tab;
   return 'status';
 }
+
+const serialDisplay = computed(() => {
+  const raw = entry.value?.serial ?? '';
+  const matched = raw.match(/(\d+)(?!.*\d)/);
+  if (!matched) return '【---】';
+  return `【${matched[1].padStart(3, '0')}】`;
+});
 
 function toggleCollapse() {
   panelCollapsed.value = !panelCollapsed.value;

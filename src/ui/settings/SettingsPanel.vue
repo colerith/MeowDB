@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="meowdb-drawer-body">
     <div class="drawer-header">
       <div class="meowdb-title">
@@ -233,6 +233,28 @@
               <span>留空 = 使用内置默认</span>
             </div>
           </section>
+
+          <section class="meowdb-prompt-card">
+            <header class="meowdb-prompt-card-head">
+              <div>
+                <h4>Echoes 更新提示词</h4>
+                <p>用于维护承诺回收池（优先兑现旧承诺，完成即清理）。</p>
+              </div>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="restoreEchoesPrompt">恢复默认</button>
+            </header>
+
+            <textarea
+              class="meowdb-input meowdb-prompt-textarea"
+              v-model="settings.echoes_prompt"
+              rows="12"
+              placeholder="留空将使用默认 echoes 提示词"
+            />
+
+            <div class="meowdb-prompt-meta">
+              <span>字符数：{{ settings.echoes_prompt?.length || 0 }}</span>
+              <span>留空 = 使用内置默认</span>
+            </div>
+          </section>
         </div>
       </Transition>
     </div>
@@ -241,7 +263,7 @@
 
 <script setup lang="ts">
 import { sampleEntry } from '@/data/sample-entry';
-import { DEFAULT_RELATIONS_PROMPT } from '@/modules/ai-updater/prompt-builder';
+import { DEFAULT_ECHOES_PROMPT, DEFAULT_RELATIONS_PROMPT } from '@/modules/ai-updater/prompt-builder';
 import { clearAllEntries, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import { storeToRefs } from 'pinia';
@@ -537,6 +559,11 @@ async function clearAll() {
 function restoreRelationsPrompt() {
   settings.value.relations_prompt = DEFAULT_RELATIONS_PROMPT;
   toastr.success('已还原默认 relations 提示词');
+}
+
+function restoreEchoesPrompt() {
+  settings.value.echoes_prompt = DEFAULT_ECHOES_PROMPT;
+  toastr.success('已还原默认 echoes 提示词');
 }
 
 watch(

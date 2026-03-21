@@ -1,4 +1,4 @@
-﻿import { extension_settings } from '@sillytavern/scripts/extensions';
+import { extension_settings } from '@sillytavern/scripts/extensions';
 import { getStContext } from '@/core/api-bridge';
 import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
 import { callApi } from '@/modules/ai-updater/api-caller';
@@ -17,7 +17,10 @@ export async function runManualAiUpdate(): Promise<ManualUpdateResult> {
   const settings = readSettings();
   const currentEntry = getCurrentEntry() ?? createDefaultEntry();
   const chatHistory = buildChatHistory();
-  const prompt = buildPrompt(currentEntry, chatHistory, { relationsPrompt: settings.relations_prompt });
+  const prompt = buildPrompt(currentEntry, chatHistory, {
+    relationsPrompt: settings.relations_prompt,
+    echoesPrompt: settings.echoes_prompt,
+  });
 
   try {
     const raw = await callApi(prompt, settings);
