@@ -3489,3 +3489,42 @@
     0 10px 20px rgba(152, 89, 114, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
+
+/* ==== Scoped Scrollbar Refresh ==== */
+#chat .meow-db-panel,
+.meowdb-modal,
+.meowdb-rel-detail-mask {
+  --scroll-width: 8px;
+}
+
+#chat .meow-db-panel ::-webkit-scrollbar,
+.meowdb-modal ::-webkit-scrollbar,
+.meowdb-rel-detail-mask ::-webkit-scrollbar {
+  width: var(--scroll-width);
+}
+
+#chat .meow-db-panel ::-webkit-scrollbar:horizontal,
+.meowdb-modal ::-webkit-scrollbar:horizontal,
+.meowdb-rel-detail-mask ::-webkit-scrollbar:horizontal {
+  height: var(--scroll-width);
+}
+
+#chat .meow-db-panel ::-webkit-scrollbar-track,
+.meowdb-modal ::-webkit-scrollbar-track,
+.meowdb-rel-detail-mask ::-webkit-scrollbar-track {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+
+#chat .meow-db-panel ::-webkit-scrollbar-thumb:vertical,
+#chat .meow-db-panel ::-webkit-scrollbar-thumb:horizontal,
+.meowdb-modal ::-webkit-scrollbar-thumb:vertical,
+.meowdb-modal ::-webkit-scrollbar-thumb:horizontal,
+.meowdb-rel-detail-mask ::-webkit-scrollbar-thumb:vertical,
+.meowdb-rel-detail-mask ::-webkit-scrollbar-thumb:horizontal {
+  background-color: rgba(110, 138, 189, 0.68);
+  background-color: color-mix(in srgb, var(--theme-color-1) 70%, transparent);
+  box-shadow: none;
+  border: 0;
+}
