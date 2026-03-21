@@ -3400,3 +3400,37 @@
     font-size: 30px !important;
   }
 }
+/* ==== Requested Hard Overrides ==== */
+#chat > div.meow-db-panel > section > header {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#chat > div.meow-db-panel > section > aside > article {
+  max-height: min(45vh, 560px) !important;
+}
+
+.meowdb-rel-edit-section h4,
+.meowdb-title-group h3,
+.meowdb-status-title strong,
+.meowdb-todo-card-head h4,
+.meowdb-echo-head b {
+  margin-bottom: 10px !important;
+}
+
+.meowdb-rel-detail-mask {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+/* Hide all scrollbar tracks color */
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+* {
+  scrollbar-color: rgba(108, 136, 188, 0.72) transparent !important;
+}
