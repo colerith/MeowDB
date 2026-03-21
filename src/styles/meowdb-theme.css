@@ -30,8 +30,6 @@
   font-family: var(--meowdb-font-ui) !important;
 }
 
-
-
 /* Keep Font Awesome icons from being overridden by the scoped font reset. */
 .meowdb-modal :is(.fa, .fa-solid, .fa-regular)::before,
 .meowdb-visual-shell :is(.fa, .fa-solid, .fa-regular)::before {
@@ -42,7 +40,6 @@
 .meowdb-visual-shell :is(.fa-brands)::before {
   font-family: 'Font Awesome 6 Brands' !important;
 }
-
 
 .meowdb-modal code,
 .meowdb-modal pre,

@@ -2812,9 +2812,6 @@
   font-family: var(--meowdb-font-ui);
 }
 
-
-
-
 /* Keep Font Awesome icons from being overridden by the scoped font reset. */
 .meowdb-modal :is(.fa, .fa-solid, .fa-regular)::before,
 .meowdb-visual-shell :is(.fa, .fa-solid, .fa-regular)::before {
@@ -2825,7 +2822,6 @@
 .meowdb-visual-shell :is(.fa-brands)::before {
   font-family: 'Font Awesome 6 Brands';
 }
-
 
 .meowdb-modal :where(h1, h2, h3, h4, h5, h6),
 .meowdb-visual-shell :where(h1, h2, h3, h4, h5, h6) {
@@ -2869,4 +2865,3 @@
 .meowdb-modal pre {
   font-family: var(--meowdb-font-mono);
 }
-
