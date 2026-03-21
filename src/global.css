@@ -679,7 +679,7 @@
 }
 
 .meowdb-rel-card::after {
-  content: '查看详情';
+  content: '鏌ョ湅璇︽儏';
   position: absolute;
   right: 10px;
   bottom: 10px;
@@ -2865,8 +2865,6 @@
 .meowdb-modal pre {
   font-family: var(--meowdb-font-mono);
 }
-<<<<<<< HEAD
-
 
 /* ==== MeowDB panel width + status heading polish ==== */
 .meow-db-panel {
@@ -2920,5 +2918,3 @@
   content: none !important;
   display: none !important;
 }
-=======
->>>>>>> e75363ea994a8bd114b83a08b62b22568b322147
