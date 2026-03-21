@@ -154,35 +154,99 @@
             </div>
           </details>
         </div>
-
         <div v-else-if="activeTab === 'echoes'" key="echoes" class="meowdb-tab-panel meowdb-echo-wrap">
-          <div class="meowdb-echo-head">
-            <b>承诺池（{{ echoItems.length }}/10）</b>
-            <span>优先兑现旧承诺，完成即清理</span>
-          </div>
+          <section class="meowdb-echo-section">
+            <div class="meowdb-echo-head">
+              <b>承诺池（{{ echoItems.length }}/10）</b>
+              <span>优先兑现旧承诺，完成即清理</span>
+            </div>
 
-          <ul v-if="echoItems.length > 0" class="meowdb-echo-list">
-            <li v-for="(echo, index) in echoItems" :key="`${echo.character}-${index}`" class="meowdb-echo-item">
-              <span class="meowdb-echo-index">#{{ index + 1 }}</span>
-              <span class="meowdb-echo-name">[{{ echo.character }}]</span>
-              <div class="meowdb-echo-body">
-                <p class="meowdb-echo-line">
-                  <b>承诺：</b><span>{{ getEchoPromise(echo) }}</span>
-                </p>
-                <p class="meowdb-echo-line">
-                  <b>待办：</b><span>{{ getEchoTodo(echo) }}</span>
-                </p>
+            <ul v-if="echoItems.length > 0" class="meowdb-echo-list">
+              <li v-for="(echo, index) in echoItems" :key="`${echo.character}-${index}`" class="meowdb-echo-item">
+                <span class="meowdb-echo-index">#{{ index + 1 }}</span>
+                <span class="meowdb-echo-name">[{{ echo.character }}]</span>
+                <p class="meowdb-echo-promise">{{ getEchoPromise(echo) }}</p>
+                <span class="meowdb-echo-status" :class="getEchoStatusClass(echo)">{{ getEchoStatusText(echo) }}</span>
+              </li>
+            </ul>
+
+            <UnifiedEmptyState
+              v-else
+              title="暂无承诺条目"
+              description="执行 AI 更新后会在这里维护长期承诺池。"
+              extra-class="meowdb-empty-state-echo"
+            />
+          </section>
+
+          <section class="meowdb-todo-section">
+            <div class="meowdb-echo-head">
+              <b>待办（{{ todoItems.length }}/10）</b>
+              <div class="meowdb-todo-head-actions">
+                <span>短期任务，按四象限与 AI 优先级推进</span>
+                <button class="menu_button meowdb-tool-btn" type="button" @click="toggleTodoForm">
+                  {{ showTodoForm ? '收起' : '新增待办' }}
+                </button>
               </div>
-              <span class="meowdb-echo-status" :class="getEchoStatusClass(echo)">{{ getEchoStatusText(echo) }}</span>
-            </li>
-          </ul>
+            </div>
 
-          <UnifiedEmptyState
-            v-else
-            title="暂无承诺条目"
-            description="执行 AI 更新后会在这里维护承诺状态与清理节奏。"
-            extra-class="meowdb-empty-state-echo"
-          />
+            <div v-if="showTodoForm" class="meowdb-todo-form-card">
+              <div class="meowdb-todo-form-grid">
+                <input class="meowdb-input" v-model.trim="todoForm.title" placeholder="待办标题（必填）" />
+                <input class="meowdb-input" v-model.trim="todoForm.eta" placeholder="预计执行时间" />
+                <input class="meowdb-input" v-model.trim="todoForm.participants" placeholder="参与人员，逗号分隔" />
+                <select class="meowdb-input" v-model="todoForm.quadrant">
+                  <option value="Q1">Q1 紧急且重要</option>
+                  <option value="Q2">Q2 重要不紧急</option>
+                  <option value="Q3">Q3 紧急不重要</option>
+                  <option value="Q4">Q4 不紧急不重要</option>
+                </select>
+                <select class="meowdb-input" v-model="todoForm.status">
+                  <option value="待执行">待执行</option>
+                  <option value="进行中">进行中</option>
+                  <option value="已完成">已完成</option>
+                </select>
+                <input class="meowdb-input" v-model.trim="todoForm.note" placeholder="备注" />
+              </div>
+              <div class="meowdb-todo-form-actions">
+                <button class="menu_button meowdb-tool-btn" type="button" @click="addTodoItem">保存待办</button>
+              </div>
+            </div>
+
+            <div v-if="todoItems.length > 0" class="meowdb-todo-grid">
+              <article
+                v-for="(todo, index) in todoItems"
+                :key="`${todo.title}-${index}`"
+                class="meowdb-todo-card"
+                :class="[`is-${todo.quadrant.toLowerCase()}`, `is-${todo.aiPriority.toLowerCase()}`]"
+              >
+                <header class="meowdb-todo-card-head">
+                  <h4>{{ todo.title }}</h4>
+                  <span class="meowdb-echo-status" :class="todo.status === '已完成' ? 'is-done' : 'is-pending'">{{
+                    todo.status
+                  }}</span>
+                </header>
+                <p class="meowdb-todo-line">
+                  <b>预计：</b><span>{{ todo.eta || '未设置' }}</span>
+                </p>
+                <p class="meowdb-todo-line">
+                  <b>参与：</b><span>{{ formatParticipants(todo.participants) }}</span>
+                </p>
+                <p class="meowdb-todo-line">
+                  <b>等级：</b><span>{{ todo.quadrant }} · {{ todo.aiPriority }}</span>
+                </p>
+                <p class="meowdb-todo-line">
+                  <b>备注：</b><span>{{ todo.note || '无' }}</span>
+                </p>
+              </article>
+            </div>
+
+            <UnifiedEmptyState
+              v-else
+              title="暂无待办"
+              description="你可以手动新增待办，AI 也会根据剧情更新短期任务。"
+              extra-class="meowdb-empty-state-echo"
+            />
+          </section>
         </div>
 
         <div v-else key="settings" class="meowdb-tab-panel">
@@ -316,7 +380,7 @@ import { runManualAiUpdate } from '@/modules/ai-updater';
 import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import UnifiedEmptyState from '@/ui/components/UnifiedEmptyState.vue';
-import type { CharacterRelation, Echo } from '@/type/meowdb';
+import type { CharacterRelation, Echo, Todo } from '@/type/meowdb';
 import { storeToRefs } from 'pinia';
 
 type VisualTab = 'status' | 'relations' | 'echoes' | 'settings';
@@ -369,6 +433,15 @@ const entry = ref(getCurrentEntry());
 const updating = ref(false);
 const selectedRelation = ref<CharacterRelation | null>(null);
 const draft = reactive<Record<string, string>>({});
+const showTodoForm = ref(false);
+const todoForm = reactive({
+  title: '',
+  eta: '',
+  participants: '',
+  note: '',
+  quadrant: 'Q2' as Todo['quadrant'],
+  status: '待执行' as Todo['status'],
+});
 
 const activeTab = ref<VisualTab>(normalizeTab(settings.value.visual_active_tab));
 const panelCollapsed = ref(Boolean(settings.value.visual_panel_collapsed));
@@ -376,7 +449,12 @@ const paletteValues = ref<string[]>([...defaultPalette]);
 
 const relations = computed(() => entry.value?.relations ?? []);
 const echoes = computed(() => entry.value?.echoes ?? []);
+const todos = computed(() => entry.value?.todos ?? []);
 const echoItems = computed<Echo[]>(() => echoes.value.slice(0, 10));
+const todoItems = computed<Todo[]>(() => {
+  return [...todos.value].slice(0, 10).sort((a, b) => todoPriorityRank(a.aiPriority) - todoPriorityRank(b.aiPriority));
+});
+
 function getEchoStatusText(echo: Echo): '未完成' | '完成' {
   return echo.status === '完成' ? '完成' : '未完成';
 }
@@ -389,9 +467,18 @@ function getEchoPromise(echo: Echo): string {
   return echo.promise?.trim() || echo.content?.trim() || '（未填写承诺）';
 }
 
-function getEchoTodo(echo: Echo): string {
-  return echo.todo?.trim() || '（暂无待办）';
+function formatParticipants(list: string[]) {
+  if (!Array.isArray(list) || list.length === 0) return '未指定';
+  return list.filter(Boolean).join(' / ');
 }
+
+function todoPriorityRank(priority: Todo['aiPriority']) {
+  if (priority === 'P0') return 0;
+  if (priority === 'P1') return 1;
+  if (priority === 'P2') return 2;
+  return 3;
+}
+
 const relationGridClass = computed(() => {
   const count = relations.value.length;
   if (count <= 1) return 'cols-1';
@@ -646,6 +733,50 @@ function getStickerClass(relation: CharacterRelation) {
   return 'is-watch';
 }
 
+function toggleTodoForm() {
+  showTodoForm.value = !showTodoForm.value;
+}
+
+async function addTodoItem() {
+  if (!entry.value) return;
+  const title = todoForm.title.trim();
+  if (!title) {
+    toastr.warning('请先填写待办标题');
+    return;
+  }
+
+  const list = [...(entry.value.todos ?? [])].slice(0, 10);
+  if (list.length >= 10) {
+    toastr.warning('待办上限为 10 条');
+    return;
+  }
+
+  const participants = todoForm.participants
+    .split(/[，,]/)
+    .map(item => item.trim())
+    .filter(Boolean);
+
+  list.push({
+    title,
+    eta: todoForm.eta.trim(),
+    participants,
+    note: todoForm.note.trim(),
+    quadrant: todoForm.quadrant,
+    aiPriority: todoForm.quadrant === 'Q1' ? 'P1' : todoForm.quadrant === 'Q2' ? 'P2' : 'P3',
+    status: todoForm.status,
+  });
+
+  entry.value.todos = list;
+  await persistEntry();
+
+  todoForm.title = '';
+  todoForm.eta = '';
+  todoForm.participants = '';
+  todoForm.note = '';
+  todoForm.quadrant = 'Q2';
+  todoForm.status = '待执行';
+  showTodoForm.value = false;
+}
 function refresh() {
   entry.value = getCurrentEntry();
 }

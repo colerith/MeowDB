@@ -46,9 +46,18 @@ export const CharacterRelationSchema = z.object({
 export const EchoSchema = z.object({
   character: z.string().trim().min(1),
   promise: z.string().default(''),
-  todo: z.string().default(''),
   content: z.string().trim().default(''),
   status: z.enum(['未完成', '完成']).default('未完成'),
+});
+
+export const TodoSchema = z.object({
+  title: z.string().trim().min(1),
+  eta: z.string().default(''),
+  participants: z.array(z.string()).default([]),
+  note: z.string().default(''),
+  quadrant: z.enum(['Q1', 'Q2', 'Q3', 'Q4']).default('Q2'),
+  aiPriority: z.enum(['P0', 'P1', 'P2', 'P3']).default('P2'),
+  status: z.enum(['待执行', '进行中', '已完成']).default('待执行'),
 });
 
 export const ArchivedNPCSchema = z.object({
@@ -88,6 +97,7 @@ export const MeowDBEntrySchema = z.object({
   plot: z.string().default(''),
   relations: z.array(CharacterRelationSchema).default([]),
   echoes: z.array(EchoSchema).default([]),
+  todos: z.array(TodoSchema).default([]),
   archived: z.array(ArchivedNPCSchema).default([]),
   enigmas: z.array(EnigmaSchema).default([]),
   seeds: z.array(SeedSchema).default([]),
@@ -98,6 +108,7 @@ export type ClothingParts = z.infer<typeof ClothingPartsSchema>;
 export type AppearanceParts = z.infer<typeof AppearancePartsSchema>;
 export type CharacterRelation = z.infer<typeof CharacterRelationSchema>;
 export type Echo = z.infer<typeof EchoSchema>;
+export type Todo = z.infer<typeof TodoSchema>;
 export type ArchivedNPC = z.infer<typeof ArchivedNPCSchema>;
 export type Enigma = z.infer<typeof EnigmaSchema>;
 export type Seed = z.infer<typeof SeedSchema>;

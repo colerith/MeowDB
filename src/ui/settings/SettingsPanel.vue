@@ -238,7 +238,7 @@
             <header class="meowdb-prompt-card-head">
               <div>
                 <h4>承诺 更新提示词</h4>
-                <p>用于维护承诺池（根据状态处理、实现与清理）。</p>
+                <p>用于维护承诺池与待办池（根据状态处理、实现与清理）。</p>
               </div>
               <button class="menu_button meowdb-tool-btn" type="button" @click="restoreEchoesPrompt">恢复默认</button>
             </header>
