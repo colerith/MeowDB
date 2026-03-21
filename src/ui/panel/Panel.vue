@@ -233,6 +233,9 @@
                 @drop="onTodoDrop(index)"
               >
                 <header class="meowdb-todo-card-head">
+                  <span class="meowdb-todo-drag" title="拖拽排序" aria-label="拖拽排序">
+                    <i class="fa-solid fa-grip-vertical" aria-hidden="true"></i>
+                  </span>
                   <h4>{{ todo.title }}</h4>
                   <span class="meowdb-echo-status" :class="todo.status === '已完成' ? 'is-done' : 'is-pending'">
                     {{ todo.status }}
