@@ -285,10 +285,16 @@
               </label>
             </div>
           </div>
-        </div> </Transition
-      >`n
+        </div>
+      </Transition>
+
       <Transition name="meowdb-slide">
-        <aside v-if="selectedRelation" class="meowdb-rel-detail-mask" @click.self="selectedRelation = null">
+        <aside
+          v-if="selectedRelation"
+          v-append-to-body
+          class="meowdb-rel-detail-mask"
+          @click.self="selectedRelation = null"
+        >
           <article
             class="meowdb-rel-detail"
             @keydown.left.prevent="selectPrev"
@@ -391,8 +397,8 @@
               </div>
             </section>
           </article>
-        </aside> </Transition
-      >`n
+        </aside>
+      </Transition>
     </template>
   </section>
 </template>
@@ -414,6 +420,18 @@ interface EditableField {
 }
 
 const defaultPalette = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
+
+const vAppendToBody = {
+  mounted(el: HTMLElement) {
+    if (el.parentElement !== document.body) document.body.appendChild(el);
+  },
+  updated(el: HTMLElement) {
+    if (el.parentElement !== document.body) document.body.appendChild(el);
+  },
+  unmounted(el: HTMLElement) {
+    el.remove();
+  },
+};
 
 const coreFields: EditableField[] = [
   { key: 'gender', label: '性别' },
