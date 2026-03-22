@@ -159,7 +159,7 @@
                       {{ event.pinned ? '已置顶' : '普通' }}
                     </span>
                   </div>
-                  <p class="meowdb-event-meta">{{ event.time }} ? {{ event.location }}</p>
+                  <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
                   <p class="meowdb-event-summary">{{ event.summary }}</p>
                   <footer class="meowdb-todo-card-foot">
                     <button class="menu_button meowdb-tool-btn" type="button" @click="startEditEvent(event)">
@@ -176,9 +176,9 @@
               </ul>
             </section>
 
-            <ul v-if="timelineEventItems.length > 0" class="meowdb-event-list">
+            <ul v-if="pagedTimelineEventItems.length > 0" class="meowdb-event-list">
               <li
-                v-for="event in timelineEventItems"
+                v-for="event in pagedTimelineEventItems"
                 :key="event.id || `${event.messageIndex}-${event.summary}`"
                 class="meowdb-event-item"
               >
@@ -189,7 +189,7 @@
                     {{ event.pinned ? '已置顶' : '普通' }}
                   </span>
                 </div>
-                <p class="meowdb-event-meta">{{ event.time }} ? {{ event.location }}</p>
+                <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
                 <p class="meowdb-event-summary">{{ event.summary }}</p>
                 <footer class="meowdb-todo-card-foot">
                   <button class="menu_button meowdb-tool-btn" type="button" @click="startEditEvent(event)">编辑</button>
@@ -202,6 +202,26 @@
                 </footer>
               </li>
             </ul>
+
+            <div v-if="timelineTotalPages > 1" class="meowdb-event-pagination">
+              <button
+                class="menu_button meowdb-tool-btn"
+                type="button"
+                :disabled="eventPage <= 1"
+                @click="prevEventPage"
+              >
+                上一页
+              </button>
+              <span>{{ eventPage }} / {{ timelineTotalPages }}</span>
+              <button
+                class="menu_button meowdb-tool-btn"
+                type="button"
+                :disabled="eventPage >= timelineTotalPages"
+                @click="nextEventPage"
+              >
+                下一页
+              </button>
+            </div>
 
             <UnifiedEmptyState
               v-else
@@ -700,7 +720,13 @@ const sortedEventItems = computed<StoryEvent[]>(() => {
 });
 
 const pinnedEventItems = computed<StoryEvent[]>(() => sortedEventItems.value.filter(item => item.pinned).slice(0, 3));
-const timelineEventItems = computed<StoryEvent[]>(() => sortedEventItems.value);
+const timelineEventItems = computed<StoryEvent[]>(() => sortedEventItems.value.filter(item => !item.pinned));
+const timelineTotalPages = computed(() => Math.max(1, Math.ceil(timelineEventItems.value.length / EVENT_PAGE_SIZE)));
+const pagedTimelineEventItems = computed<StoryEvent[]>(() => {
+  const page = Math.min(Math.max(eventPage.value, 1), timelineTotalPages.value);
+  const start = (page - 1) * EVENT_PAGE_SIZE;
+  return timelineEventItems.value.slice(start, start + EVENT_PAGE_SIZE);
+});
 const latestEvent = computed<StoryEvent | null>(() => sortedEventItems.value[0] ?? null);
 
 const statusTimeText = computed(() => {
@@ -886,10 +912,19 @@ const manualFields = computed(() => {
 
 watch(activeTab, tab => {
   settings.value.visual_active_tab = tab;
+  if (tab === 'events') {
+    if (eventPage.value > timelineTotalPages.value) eventPage.value = timelineTotalPages.value;
+    if (eventPage.value < 1) eventPage.value = 1;
+  }
 });
 
 watch(panelCollapsed, collapsed => {
   settings.value.visual_panel_collapsed = collapsed;
+});
+
+watch(timelineTotalPages, total => {
+  if (eventPage.value > total) eventPage.value = total;
+  if (eventPage.value < 1) eventPage.value = 1;
 });
 
 watch(
@@ -1022,6 +1057,16 @@ function getStickerClass(relation: CharacterRelation) {
   if (text === '升温') return 'is-up';
   if (text === '紧张') return 'is-down';
   return 'is-watch';
+}
+
+function prevEventPage() {
+  if (eventPage.value <= 1) return;
+  eventPage.value -= 1;
+}
+
+function nextEventPage() {
+  if (eventPage.value >= timelineTotalPages.value) return;
+  eventPage.value += 1;
 }
 
 async function toggleEventPin(event: StoryEvent) {

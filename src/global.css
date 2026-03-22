@@ -3765,3 +3765,53 @@
   height: 0;
   display: none;
 }
+
+/* ==== Event Layout Fixes ==== */
+.meowdb-tab-row {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.meowdb-event-item {
+  overflow: hidden;
+}
+
+.meowdb-event-meta,
+.meowdb-event-summary {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.meowdb-event-page-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #355689;
+  background: rgba(188, 210, 238, 0.3);
+  border: 1px solid rgba(132, 164, 209, 0.35);
+}
+
+.meowdb-event-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.meowdb-event-pagination span {
+  font-size: 12px;
+  color: #355689;
+}
+
+@media (max-width: 820px) {
+  .meowdb-tab-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .meowdb-event-pagination {
+    justify-content: space-between;
+  }
+}
