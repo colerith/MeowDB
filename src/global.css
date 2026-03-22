@@ -3729,3 +3729,39 @@
     gap: 6px;
   }
 }
+
+/* ==== Event Form + Local Scrollbar Hidden ==== */
+.meowdb-event-form-card {
+  display: grid;
+  gap: 8px;
+}
+
+.meowdb-event-summary-input {
+  min-height: 96px;
+}
+
+.meowdb-event-pin-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #3b517a;
+}
+
+#chat .meow-db-panel,
+#chat .meow-db-panel *,
+.meowdb-modal,
+.meowdb-modal *,
+.meowdb-rel-detail-mask,
+.meowdb-rel-detail-mask * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#chat .meow-db-panel ::-webkit-scrollbar,
+.meowdb-modal ::-webkit-scrollbar,
+.meowdb-rel-detail-mask ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

@@ -87,35 +87,94 @@
         </div>
 
         <div v-else-if="activeTab === 'events'" key="events" class="meowdb-tab-panel meowdb-events-wrap">
-          <section class="meowdb-event-pinned" v-if="pinnedEventItems.length > 0">
-            <div class="meowdb-echo-head">
-              <b>置顶事件（{{ pinnedEventItems.length }}/3）</b>
-              <span>置顶事件会被 AI 优先关注</span>
-            </div>
-            <ul class="meowdb-event-list is-pinned">
-              <li
-                v-for="event in pinnedEventItems"
-                :key="event.id || `${event.messageIndex}-${event.summary}`"
-                class="meowdb-event-item"
-              >
-                <div class="meowdb-event-line">
-                  <span class="meowdb-event-message">{{ formatMessageRef(event.messageIndex) }}</span>
-                  <span class="meowdb-event-tag" :class="getEventTagClass(event.tag)">{{ event.tag }}</span>
-                  <button class="menu_button meowdb-tool-btn" type="button" @click="toggleEventPin(event)">
-                    取消置顶
-                  </button>
-                </div>
-                <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
-                <p class="meowdb-event-summary">{{ event.summary }}</p>
-              </li>
-            </ul>
-          </section>
-
           <section class="meowdb-events-timeline">
             <div class="meowdb-echo-head">
               <b>事件时间轴（{{ timelineEventItems.length }}）</b>
-              <span>最新事件在最上方，记录根据 message 几生成</span>
+              <div class="meowdb-todo-head-actions">
+                <span>最新事件在最上方，记录根据消息楼层数生成</span>
+                <button class="menu_button meowdb-tool-btn" type="button" @click="toggleEventForm">
+                  {{ showEventForm ? '收起' : '新增事件' }}
+                </button>
+              </div>
             </div>
+
+            <div v-if="showEventForm" class="meowdb-todo-form-card meowdb-event-form-card">
+              <div class="meowdb-todo-form-grid">
+                <input
+                  class="meowdb-input"
+                  v-model.number="eventForm.messageIndex"
+                  type="number"
+                  min="1"
+                  placeholder="消息楼层数（必填）"
+                />
+                <input class="meowdb-input" v-model.trim="eventForm.time" placeholder="事件时间（必填）" />
+                <input class="meowdb-input" v-model.trim="eventForm.location" placeholder="事件地点（必填）" />
+                <select class="meowdb-input" v-model="eventForm.tag">
+                  <option value="日常">日常</option>
+                  <option value="转折">转折</option>
+                  <option value="关键">关键</option>
+                  <option value="大事件">大事件</option>
+                </select>
+                <label class="meowdb-event-pin-check">
+                  <input type="checkbox" v-model="eventForm.pinned" />
+                  <span>置顶事件（最多3条）</span>
+                </label>
+              </div>
+              <textarea
+                class="meowdb-input meowdb-prompt-textarea meowdb-event-summary-input"
+                v-model.trim="eventForm.summary"
+                rows="4"
+                placeholder="事件内容：客观事实记录故事骨架，保留核心细节，150-300字，不换行"
+              />
+              <div class="meowdb-todo-form-actions">
+                <button class="menu_button meowdb-tool-btn" type="button" @click="saveEventItem">
+                  {{ editingEventKey ? '更新事件' : '保存事件' }}
+                </button>
+                <button
+                  v-if="editingEventKey"
+                  class="menu_button meowdb-tool-btn"
+                  type="button"
+                  @click="clearEventForm"
+                >
+                  取消编辑
+                </button>
+              </div>
+            </div>
+
+            <section class="meowdb-event-pinned" v-if="pinnedEventItems.length > 0">
+              <div class="meowdb-echo-head">
+                <b>置顶事件（{{ pinnedEventItems.length }}/3）</b>
+                <span>置顶事件会被 AI 优先关注</span>
+              </div>
+              <ul class="meowdb-event-list is-pinned">
+                <li
+                  v-for="event in pinnedEventItems"
+                  :key="event.id || `${event.messageIndex}-${event.summary}`"
+                  class="meowdb-event-item"
+                >
+                  <div class="meowdb-event-line">
+                    <span class="meowdb-event-message">{{ formatMessageRef(event.messageIndex) }}</span>
+                    <span class="meowdb-event-tag" :class="getEventTagClass(event.tag)">{{ event.tag }}</span>
+                    <span class="meowdb-echo-status" :class="event.pinned ? 'is-active' : 'is-waiting'">
+                      {{ event.pinned ? '已置顶' : '普通' }}
+                    </span>
+                  </div>
+                  <p class="meowdb-event-meta">{{ event.time }} ? {{ event.location }}</p>
+                  <p class="meowdb-event-summary">{{ event.summary }}</p>
+                  <footer class="meowdb-todo-card-foot">
+                    <button class="menu_button meowdb-tool-btn" type="button" @click="startEditEvent(event)">
+                      编辑
+                    </button>
+                    <button class="menu_button meowdb-tool-btn" type="button" @click="toggleEventPin(event)">
+                      取消置顶
+                    </button>
+                    <button class="menu_button meowdb-tool-btn danger" type="button" @click="removeEventItem(event)">
+                      删除
+                    </button>
+                  </footer>
+                </li>
+              </ul>
+            </section>
 
             <ul v-if="timelineEventItems.length > 0" class="meowdb-event-list">
               <li
@@ -126,24 +185,28 @@
                 <div class="meowdb-event-line">
                   <span class="meowdb-event-message">{{ formatMessageRef(event.messageIndex) }}</span>
                   <span class="meowdb-event-tag" :class="getEventTagClass(event.tag)">{{ event.tag }}</span>
-                  <button
-                    class="menu_button meowdb-tool-btn"
-                    type="button"
-                    :disabled="!event.pinned && pinnedEventItems.length >= 3"
-                    @click="toggleEventPin(event)"
-                  >
+                  <span class="meowdb-echo-status" :class="event.pinned ? 'is-active' : 'is-waiting'">
+                    {{ event.pinned ? '已置顶' : '普通' }}
+                  </span>
+                </div>
+                <p class="meowdb-event-meta">{{ event.time }} ? {{ event.location }}</p>
+                <p class="meowdb-event-summary">{{ event.summary }}</p>
+                <footer class="meowdb-todo-card-foot">
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="startEditEvent(event)">编辑</button>
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="toggleEventPin(event)">
                     {{ event.pinned ? '取消置顶' : '置顶' }}
                   </button>
-                </div>
-                <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
-                <p class="meowdb-event-summary">{{ event.summary }}</p>
+                  <button class="menu_button meowdb-tool-btn danger" type="button" @click="removeEventItem(event)">
+                    删除
+                  </button>
+                </footer>
               </li>
             </ul>
 
             <UnifiedEmptyState
               v-else
               title="暂无事件"
-              description="执行 AI 更新后会生成事件时间轴，并映射到状态卡。"
+              description="你可以手动新增事件，或执行 AI 更新自动生成时间轴。"
               extra-class="meowdb-empty-state-echo"
             />
           </section>
@@ -596,6 +659,17 @@ const draft = reactive<Record<string, string>>({});
 const showTodoForm = ref(false);
 const editingTodoIndex = ref<number | null>(null);
 const draggingTodoIndex = ref<number | null>(null);
+const showEventForm = ref(false);
+const editingEventKey = ref<string | null>(null);
+const eventForm = reactive({
+  id: '',
+  messageIndex: 1,
+  time: '',
+  location: '',
+  summary: '',
+  tag: '日常' as StoryEvent['tag'],
+  pinned: false,
+});
 const todoForm = reactive({
   title: '',
   eta: '',
@@ -632,7 +706,7 @@ const latestEvent = computed<StoryEvent | null>(() => sortedEventItems.value[0] 
 const statusTimeText = computed(() => {
   const eventTime = latestEvent.value?.time?.trim();
   if (eventTime) return eventTime;
-  return entry.value?.time?.trim() || '???';
+  return entry.value?.time?.trim() || '未设置';
 });
 
 const statusLocationText = computed(() => {
@@ -644,31 +718,36 @@ const statusLocationText = computed(() => {
 const statusPlotText = computed(() => {
   const eventSummary = latestEvent.value?.summary?.trim();
   if (eventSummary) return eventSummary;
-  return entry.value?.plot?.trim() || '??????';
+  return entry.value?.plot?.trim() || '暂无剧情摘要';
 });
 
-function getEchoStatusText(echo: Echo): '???' | '??' {
-  return echo.status === '??' ? '??' : '???';
+function getEchoStatusText(echo: Echo): '未完成' | '完成' {
+  return echo.status === '完成' ? '完成' : '未完成';
 }
 
 function getStatusClass(status: Todo['status'] | Echo['status']) {
-  if (status === '???') return 'is-waiting';
-  if (status === '???') return 'is-pending';
-  if (status === '???') return 'is-active';
-  if (status === '???' || status === '??') return 'is-done';
+  if (status === '待执行') return 'is-waiting';
+  if (status === '未完成') return 'is-pending';
+  if (status === '进行中') return 'is-active';
+  if (status === '已完成' || status === '完成') return 'is-done';
   return 'is-pending';
 }
 
 function formatMessageRef(messageIndex: number) {
   const safeIndex = Number.isFinite(messageIndex) ? Math.max(1, Math.trunc(messageIndex)) : 1;
-  return `message #${safeIndex}`;
+  return `消息 #${safeIndex} 层`;
 }
 
 function getEventTagClass(tag: StoryEvent['tag']) {
-  if (tag === '??') return 'is-turn';
-  if (tag === '??') return 'is-key';
-  if (tag === '???') return 'is-major';
+  if (tag === '转折') return 'is-turn';
+  if (tag === '关键') return 'is-key';
+  if (tag === '大事件') return 'is-major';
   return 'is-daily';
+}
+
+function getEventKey(event: StoryEvent) {
+  if (event.id?.trim()) return `id:${event.id.trim()}`;
+  return `msg:${event.messageIndex}|${event.summary}`;
 }
 
 function getEchoStatusClass(echo: Echo) {
@@ -948,10 +1027,8 @@ function getStickerClass(relation: CharacterRelation) {
 async function toggleEventPin(event: StoryEvent) {
   if (!entry.value) return;
   const list = [...(entry.value.events ?? [])];
-  const index = list.findIndex(
-    item =>
-      (item.id && item.id === event.id) || (item.messageIndex === event.messageIndex && item.summary === event.summary),
-  );
+  const targetKey = getEventKey(event);
+  const index = list.findIndex(item => getEventKey(item) === targetKey);
   if (index < 0) return;
 
   const current = list[index];
@@ -967,6 +1044,117 @@ async function toggleEventPin(event: StoryEvent) {
   list[index] = { ...current, pinned: nextPinned };
   entry.value.events = list;
   await persistEntry();
+}
+
+function toggleEventForm() {
+  showEventForm.value = !showEventForm.value;
+  if (!showEventForm.value) clearEventForm();
+}
+
+function clearEventForm() {
+  eventForm.id = '';
+  eventForm.messageIndex = Math.max(1, (latestEvent.value?.messageIndex ?? 0) + 1);
+  eventForm.time = '';
+  eventForm.location = '';
+  eventForm.summary = '';
+  eventForm.tag = '日常';
+  eventForm.pinned = false;
+  editingEventKey.value = null;
+}
+
+function startEditEvent(event: StoryEvent) {
+  eventForm.id = event.id ?? '';
+  eventForm.messageIndex = event.messageIndex ?? 1;
+  eventForm.time = event.time ?? '';
+  eventForm.location = event.location ?? '';
+  eventForm.summary = event.summary ?? '';
+  eventForm.tag = event.tag ?? '日常';
+  eventForm.pinned = Boolean(event.pinned);
+  editingEventKey.value = getEventKey(event);
+  showEventForm.value = true;
+}
+
+async function removeEventItem(event: StoryEvent) {
+  if (!entry.value) return;
+  const targetKey = getEventKey(event);
+  const list = [...(entry.value.events ?? [])];
+  const index = list.findIndex(item => getEventKey(item) === targetKey);
+  if (index < 0) return;
+  list.splice(index, 1);
+  entry.value.events = list;
+  if (editingEventKey.value === targetKey) clearEventForm();
+  await persistEntry();
+}
+
+function normalizeEventSummaryText(text: string) {
+  return text
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function saveEventItem() {
+  if (!entry.value) return;
+
+  const messageIndex = Number(eventForm.messageIndex || 0);
+  const time = eventForm.time.trim();
+  const location = eventForm.location.trim();
+  const summary = normalizeEventSummaryText(eventForm.summary);
+
+  if (!Number.isFinite(messageIndex) || messageIndex < 1) {
+    toastr.warning('请填写有效的消息楼层数');
+    return;
+  }
+  if (!time || !location) {
+    toastr.warning('请填写事件时间与地点');
+    return;
+  }
+  if (!summary) {
+    toastr.warning('请填写事件内容');
+    return;
+  }
+  if (summary.length < 150 || summary.length > 300) {
+    toastr.warning('事件内容需为 150-300 字，并保持单行');
+    return;
+  }
+
+  const list = [...(entry.value.events ?? [])];
+  const nextItem: StoryEvent = {
+    id: eventForm.id.trim(),
+    messageIndex: Math.trunc(messageIndex),
+    time,
+    location,
+    summary,
+    tag: eventForm.tag,
+    pinned: eventForm.pinned,
+  };
+
+  if (nextItem.pinned) {
+    const pinnedCount = list.filter(item => item.pinned).length;
+    const replacingPinned = editingEventKey.value
+      ? list.some(item => getEventKey(item) === editingEventKey.value && item.pinned)
+      : false;
+    if (!replacingPinned && pinnedCount >= 3) {
+      toastr.warning('置顶事件最多 3 条');
+      return;
+    }
+  }
+
+  if (editingEventKey.value) {
+    const index = list.findIndex(item => getEventKey(item) === editingEventKey.value);
+    if (index >= 0) {
+      list[index] = nextItem;
+    } else {
+      list.unshift(nextItem);
+    }
+  } else {
+    list.unshift(nextItem);
+  }
+
+  entry.value.events = list.slice(0, 20);
+  await persistEntry();
+  clearEventForm();
+  showEventForm.value = false;
 }
 
 function toggleTodoForm() {
@@ -1230,6 +1418,7 @@ function onDataUpdated() {
 }
 
 onMounted(() => {
+  clearEventForm();
   window.addEventListener('meowdb:data-updated', onDataUpdated);
 });
 
