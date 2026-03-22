@@ -3414,6 +3414,9 @@
 .meowdb-rel-detail-mask {
   border-radius: 16px !important;
   overflow: hidden !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
 }
 
 .meowdb-echo-section .meowdb-echo-head b {
@@ -3567,6 +3570,9 @@
     align-items: stretch !important;
     justify-content: stretch !important;
     inset: 0 !important;
+    width: 100vw !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
     padding: 0 !important;
     border-radius: 0 !important;
   }
