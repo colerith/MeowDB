@@ -428,20 +428,66 @@ function ensureRelationOverlayRoot(): HTMLElement {
   return root;
 }
 
+function logRelationOverlayMetrics(stage: string, maskEl?: HTMLElement | null) {
+  try {
+    const mask = maskEl ?? (document.querySelector('.meowdb-rel-detail-mask') as HTMLElement | null);
+    const detail = mask?.querySelector('.meowdb-rel-detail') as HTMLElement | null;
+    const maskRect = mask?.getBoundingClientRect();
+    const detailRect = detail?.getBoundingClientRect();
+    const maskStyle = mask ? window.getComputedStyle(mask) : null;
+    const detailStyle = detail ? window.getComputedStyle(detail) : null;
+
+    console.log('[MeowDB][RelOverlay]', stage, {
+      viewport: {
+        innerWidth: window.innerWidth,
+        innerHeight: window.innerHeight,
+        visualViewportWidth: window.visualViewport?.width,
+        visualViewportHeight: window.visualViewport?.height,
+      },
+      rootParent: ensureRelationOverlayRoot().parentElement?.tagName ?? null,
+      maskParent: mask?.parentElement?.id || mask?.parentElement?.className || null,
+      maskRect,
+      detailRect,
+      maskStyle: maskStyle
+        ? {
+            display: maskStyle.display,
+            position: maskStyle.position,
+            zIndex: maskStyle.zIndex,
+            opacity: maskStyle.opacity,
+            visibility: maskStyle.visibility,
+          }
+        : null,
+      detailStyle: detailStyle
+        ? {
+            display: detailStyle.display,
+            position: detailStyle.position,
+            zIndex: detailStyle.zIndex,
+            opacity: detailStyle.opacity,
+            visibility: detailStyle.visibility,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.warn('[MeowDB][RelOverlay] log failed', error);
+  }
+}
+
 const vMountRelOverlay = {
   mounted(el: HTMLElement) {
     const root = ensureRelationOverlayRoot();
     if (el.parentElement !== root) root.appendChild(el);
+    requestAnimationFrame(() => logRelationOverlayMetrics('mounted', el));
   },
   updated(el: HTMLElement) {
     const root = ensureRelationOverlayRoot();
     if (el.parentElement !== root) root.appendChild(el);
+    requestAnimationFrame(() => logRelationOverlayMetrics('updated', el));
   },
   unmounted(el: HTMLElement) {
+    logRelationOverlayMetrics('before-unmounted', el);
     el.remove();
   },
 };
-
 const coreFields: EditableField[] = [
   { key: 'gender', label: '性别' },
   { key: 'birthday', label: '生日' },
@@ -885,7 +931,9 @@ function refresh() {
 }
 
 function openRelationDetail(relation: CharacterRelation) {
+  console.log('[MeowDB][RelOverlay] openRelationDetail', relation.name);
   selectedRelation.value = relation;
+  requestAnimationFrame(() => logRelationOverlayMetrics('open-requested'));
 }
 
 function openRelationByName(name: string) {
