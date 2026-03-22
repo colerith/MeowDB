@@ -19,6 +19,7 @@ export async function runManualAiUpdate(): Promise<ManualUpdateResult> {
   const chatHistory = buildChatHistory();
   const prompt = buildPrompt(currentEntry, chatHistory, {
     relationsPrompt: settings.relations_prompt,
+    eventsPrompt: settings.events_prompt,
     echoesPrompt: settings.echoes_prompt,
   });
 
@@ -26,12 +27,12 @@ export async function runManualAiUpdate(): Promise<ManualUpdateResult> {
     const raw = await callApi(prompt, settings);
     const parsed = parseResponse(raw);
     if (!parsed) {
-      return { ok: false, error: 'AI 返回无法解析为 meow_FM。' };
+      return { ok: false, error: 'AI response cannot be parsed as <meow_FM>.' };
     }
 
     const saved = await saveCurrentEntry(parsed.entry);
     if (!saved) {
-      return { ok: false, error: '解析成功，但保存前校验失败。' };
+      return { ok: false, error: 'Parsed successfully, but validation failed before save.' };
     }
 
     return { ok: true };

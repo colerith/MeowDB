@@ -24,6 +24,7 @@ export function serializeEntry(entry: MeowDBEntry): string {
     normalized.plot ?? '',
     '>>>',
     `relations_json:${JSON.stringify(normalized.relations)}`,
+    `events_json:${JSON.stringify(normalized.events ?? [])}`,
     `echoes_json:${JSON.stringify(normalized.echoes)}`,
     `todos_json:${JSON.stringify(normalized.todos ?? [])}`,
     `archived_json:${JSON.stringify(normalized.archived)}`,
@@ -69,6 +70,7 @@ function parseFmEntry(raw: string): MeowDBEntry | null {
   const plot = readPlotBlock(details) ?? '';
 
   const relations = parseJsonArray(readLineField(details, 'relations_json'));
+  const events = parseJsonArray(readLineField(details, 'events_json'));
   const echoes = parseJsonArray(readLineField(details, 'echoes_json'));
   const todos = parseJsonArray(readLineField(details, 'todos_json'));
   const archived = parseJsonArray(readLineField(details, 'archived_json'));
@@ -91,6 +93,7 @@ function parseFmEntry(raw: string): MeowDBEntry | null {
       },
       plot,
       relations,
+      events,
       echoes,
       todos,
       archived,

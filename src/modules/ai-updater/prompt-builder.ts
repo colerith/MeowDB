@@ -35,6 +35,23 @@ export const DEFAULT_RELATIONS_PROMPT = [
   '4) 对手动字段（manualEdited=true）默认保持原值，除非剧情出现明确冲突证据',
 ].join('\n');
 
+export const DEFAULT_EVENTS_PROMPT = [
+  '事件时间轴（events_json，建议保留最近20条，最新在前）：',
+  '- id: 事件ID（可留空）',
+  '- messageIndex: 事件来源消息序号（整数，表示“根据 message 几生成”）',
+  '- time: 事件时间文本（应与状态卡“当前时间”一致）',
+  '- location: 事件地点文本（应与状态卡“当前地点”一致）',
+  '- summary: 事件摘要（应与状态卡“剧情摘要”一致）',
+  '- tag: 事件标记，仅允许 日常/转折/关键/大事件',
+  '- pinned: 是否置顶（boolean）',
+  '',
+  '规则：',
+  '- 最新事件必须放在最上方，messageIndex 必须递增可追溯',
+  '- 常规事件默认 tag=日常，重大推进可标记 转折/关键/大事件',
+  '- 置顶事件最多3条，优先保留仍在持续影响剧情的事件',
+  '- 若存在置顶事件，后续关系/承诺/待办更新必须优先参考这些置顶事件',
+].join('\n');
+
 export const DEFAULT_ECHOES_PROMPT = [
   'A. 承诺池（echoes_json，长期承诺，上限10条）',
   '- character: 角色名',
@@ -60,6 +77,7 @@ export const DEFAULT_ECHOES_PROMPT = [
 
 interface BuildPromptOptions {
   relationsPrompt?: string;
+  eventsPrompt?: string;
   echoesPrompt?: string;
 }
 
@@ -69,6 +87,7 @@ export function buildPrompt(
   options: BuildPromptOptions = {},
 ): PromptPayload {
   const relationsPrompt = options.relationsPrompt?.trim() || DEFAULT_RELATIONS_PROMPT;
+  const eventsPrompt = options.eventsPrompt?.trim() || DEFAULT_EVENTS_PROMPT;
   const echoesPrompt = options.echoesPrompt?.trim() || DEFAULT_ECHOES_PROMPT;
   const manualHints = buildManualHints(currentEntry);
 
@@ -77,11 +96,13 @@ export function buildPrompt(
     '根据对话历史更新剧情结构化数据。',
     '输出必须严格为 <meow_FM><details>...</details></meow_FM>。',
     'details 内必须包含以下行键：',
-    'serial,time,nsfw,scene_main,scene_sub,scene_stay_rounds,scene_topic,plot,relations_json,echoes_json,todos_json,archived_json,enigmas_json,seeds_json',
+    'serial,time,nsfw,scene_main,scene_sub,scene_stay_rounds,scene_topic,plot,relations_json,events_json,echoes_json,todos_json,archived_json,enigmas_json,seeds_json',
     'plot 必须使用 plot:\n<<<\n...\n>>> 结构。',
     '其中 *_json 字段必须是合法 JSON 数组字符串。',
     '',
     relationsPrompt,
+    '',
+    eventsPrompt,
     '',
     echoesPrompt,
     '',
@@ -101,8 +122,10 @@ export function buildPrompt(
     '【要求】',
     '- serial 在当前基础上递增',
     '- time 反映当前轮次时间描述',
-    '- 根据剧情更新 scene / plot / relations / echoes / todos / enigmas / seeds',
+    '- 根据剧情更新 scene / plot / relations / events / echoes / todos / enigmas / seeds',
     '- 优先保证 relations_json 字段完整、可直接用于前端卡片展示',
+    '- events_json 维护时间轴（最新在前），并保证 time/location/summary 与状态卡映射一致',
+    '- events_json 中 pinned=true 的条目最多3条，后续更新需优先参考',
     '- echoes_json 为长期承诺池（最多10条）',
     '- todos_json 为短期待办池（最多10条），必须包含 quadrant 与 aiPriority',
     '- 对 manualEdited=true 的字段，默认保持值不变',

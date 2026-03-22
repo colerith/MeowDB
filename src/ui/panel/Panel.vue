@@ -30,6 +30,9 @@
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'status' }" @click="activeTab = 'status'">
           状态
         </button>
+        <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'events' }" @click="activeTab = 'events'">
+          事件
+        </button>
         <button class="meowdb-tab" :class="{ 'is-active': activeTab === 'relations' }" @click="activeTab = 'relations'">
           关系
         </button>
@@ -50,19 +53,19 @@
               <h4 class="meowdb-status-title">
                 <i class="fa-regular fa-clock" aria-hidden="true"></i><strong>当前时间</strong>
               </h4>
-              <p>{{ entry?.time || '未设置' }}</p>
+              <p>{{ statusTimeText }}</p>
             </article>
             <article class="meowdb-card">
               <h4 class="meowdb-status-title">
                 <i class="fa-solid fa-location-dot" aria-hidden="true"></i><strong>当前地点</strong>
               </h4>
-              <p>{{ sceneText }}</p>
+              <p>{{ statusLocationText }}</p>
             </article>
             <article class="meowdb-card">
               <h4 class="meowdb-status-title">
                 <i class="fa-regular fa-note-sticky" aria-hidden="true"></i><strong>剧情摘要</strong>
               </h4>
-              <p>{{ entry?.plot || '暂无摘要' }}</p>
+              <p>{{ statusPlotText }}</p>
             </article>
             <article class="meowdb-card">
               <h4 class="meowdb-status-title">
@@ -83,6 +86,68 @@
           <div class="meowdb-watermark">MeowDB Story Snapshot</div>
         </div>
 
+        <div v-else-if="activeTab === 'events'" key="events" class="meowdb-tab-panel meowdb-events-wrap">
+          <section class="meowdb-event-pinned" v-if="pinnedEventItems.length > 0">
+            <div class="meowdb-echo-head">
+              <b>置顶事件（{{ pinnedEventItems.length }}/3）</b>
+              <span>置顶事件会被 AI 优先关注</span>
+            </div>
+            <ul class="meowdb-event-list is-pinned">
+              <li
+                v-for="event in pinnedEventItems"
+                :key="event.id || `${event.messageIndex}-${event.summary}`"
+                class="meowdb-event-item"
+              >
+                <div class="meowdb-event-line">
+                  <span class="meowdb-event-message">{{ formatMessageRef(event.messageIndex) }}</span>
+                  <span class="meowdb-event-tag" :class="getEventTagClass(event.tag)">{{ event.tag }}</span>
+                  <button class="menu_button meowdb-tool-btn" type="button" @click="toggleEventPin(event)">
+                    取消置顶
+                  </button>
+                </div>
+                <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
+                <p class="meowdb-event-summary">{{ event.summary }}</p>
+              </li>
+            </ul>
+          </section>
+
+          <section class="meowdb-events-timeline">
+            <div class="meowdb-echo-head">
+              <b>事件时间轴（{{ timelineEventItems.length }}）</b>
+              <span>最新事件在最上方，记录根据 message 几生成</span>
+            </div>
+
+            <ul v-if="timelineEventItems.length > 0" class="meowdb-event-list">
+              <li
+                v-for="event in timelineEventItems"
+                :key="event.id || `${event.messageIndex}-${event.summary}`"
+                class="meowdb-event-item"
+              >
+                <div class="meowdb-event-line">
+                  <span class="meowdb-event-message">{{ formatMessageRef(event.messageIndex) }}</span>
+                  <span class="meowdb-event-tag" :class="getEventTagClass(event.tag)">{{ event.tag }}</span>
+                  <button
+                    class="menu_button meowdb-tool-btn"
+                    type="button"
+                    :disabled="!event.pinned && pinnedEventItems.length >= 3"
+                    @click="toggleEventPin(event)"
+                  >
+                    {{ event.pinned ? '取消置顶' : '置顶' }}
+                  </button>
+                </div>
+                <p class="meowdb-event-meta">{{ event.time }} · {{ event.location }}</p>
+                <p class="meowdb-event-summary">{{ event.summary }}</p>
+              </li>
+            </ul>
+
+            <UnifiedEmptyState
+              v-else
+              title="暂无事件"
+              description="执行 AI 更新后会生成事件时间轴，并映射到状态卡。"
+              extra-class="meowdb-empty-state-echo"
+            />
+          </section>
+        </div>
         <div v-else-if="activeTab === 'relations'" key="relations" class="meowdb-tab-panel meowdb-rel-wrap">
           <section
             v-if="relations.length > 0"
@@ -237,7 +302,7 @@
                     <i class="fa-solid fa-grip-vertical" aria-hidden="true"></i>
                   </span>
                   <h4>{{ todo.title }}</h4>
-                  <span class="meowdb-echo-status" :class="todo.status === '已完成' ? 'is-done' : 'is-pending'">
+                  <span class="meowdb-echo-status" :class="getStatusClass(todo.status)">
                     {{ todo.status }}
                   </span>
                 </header>
@@ -403,10 +468,10 @@ import { runManualAiUpdate } from '@/modules/ai-updater';
 import { getCurrentEntry, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import UnifiedEmptyState from '@/ui/components/UnifiedEmptyState.vue';
-import type { CharacterRelation, Echo, Todo } from '@/type/meowdb';
+import type { CharacterRelation, Echo, StoryEvent, Todo } from '@/type/meowdb';
 import { storeToRefs } from 'pinia';
 
-type VisualTab = 'status' | 'relations' | 'echoes' | 'settings';
+type VisualTab = 'status' | 'events' | 'relations' | 'echoes' | 'settings';
 
 interface EditableField {
   key: string;
@@ -550,12 +615,64 @@ const todos = computed(() => entry.value?.todos ?? []);
 const echoItems = computed<Echo[]>(() => echoes.value.slice(0, 10));
 const todoItems = computed<Todo[]>(() => [...todos.value].slice(0, 10));
 
-function getEchoStatusText(echo: Echo): '未完成' | '完成' {
-  return echo.status === '完成' ? '完成' : '未完成';
+const events = computed<StoryEvent[]>(() => [...(entry.value?.events ?? [])].slice(0, 20));
+
+const sortedEventItems = computed<StoryEvent[]>(() => {
+  return [...events.value].sort((a, b) => {
+    const byMessage = (b.messageIndex ?? 0) - (a.messageIndex ?? 0);
+    if (byMessage !== 0) return byMessage;
+    return Number(b.pinned) - Number(a.pinned);
+  });
+});
+
+const pinnedEventItems = computed<StoryEvent[]>(() => sortedEventItems.value.filter(item => item.pinned).slice(0, 3));
+const timelineEventItems = computed<StoryEvent[]>(() => sortedEventItems.value);
+const latestEvent = computed<StoryEvent | null>(() => sortedEventItems.value[0] ?? null);
+
+const statusTimeText = computed(() => {
+  const eventTime = latestEvent.value?.time?.trim();
+  if (eventTime) return eventTime;
+  return entry.value?.time?.trim() || '???';
+});
+
+const statusLocationText = computed(() => {
+  const eventLocation = latestEvent.value?.location?.trim();
+  if (eventLocation) return eventLocation;
+  return sceneText.value;
+});
+
+const statusPlotText = computed(() => {
+  const eventSummary = latestEvent.value?.summary?.trim();
+  if (eventSummary) return eventSummary;
+  return entry.value?.plot?.trim() || '??????';
+});
+
+function getEchoStatusText(echo: Echo): '???' | '??' {
+  return echo.status === '??' ? '??' : '???';
+}
+
+function getStatusClass(status: Todo['status'] | Echo['status']) {
+  if (status === '???') return 'is-waiting';
+  if (status === '???') return 'is-pending';
+  if (status === '???') return 'is-active';
+  if (status === '???' || status === '??') return 'is-done';
+  return 'is-pending';
+}
+
+function formatMessageRef(messageIndex: number) {
+  const safeIndex = Number.isFinite(messageIndex) ? Math.max(1, Math.trunc(messageIndex)) : 1;
+  return `message #${safeIndex}`;
+}
+
+function getEventTagClass(tag: StoryEvent['tag']) {
+  if (tag === '??') return 'is-turn';
+  if (tag === '??') return 'is-key';
+  if (tag === '???') return 'is-major';
+  return 'is-daily';
 }
 
 function getEchoStatusClass(echo: Echo) {
-  return getEchoStatusText(echo) === '完成' ? 'is-done' : 'is-pending';
+  return getStatusClass(getEchoStatusText(echo));
 }
 
 function getEchoPromise(echo: Echo): string {
@@ -664,7 +781,7 @@ const nsfwText = computed(() => {
 const hasStatusData = computed(() => {
   const e = entry.value;
   if (!e) return false;
-  return Boolean(e.time || e.plot || e.scene?.main || e.scene?.sub || e.nsfw);
+  return Boolean(statusTimeText.value || statusPlotText.value || statusLocationText.value || e.nsfw);
 });
 
 const allFields = computed(() => [...coreFields, ...clothingFields, ...appearanceFields]);
@@ -720,7 +837,7 @@ watch(
 );
 
 function normalizeTab(tab: string | undefined): VisualTab {
-  if (tab === 'relations' || tab === 'echoes' || tab === 'settings' || tab === 'status') return tab;
+  if (tab === 'relations' || tab === 'events' || tab === 'echoes' || tab === 'settings' || tab === 'status') return tab;
   return 'status';
 }
 
@@ -826,6 +943,30 @@ function getStickerClass(relation: CharacterRelation) {
   if (text === '升温') return 'is-up';
   if (text === '紧张') return 'is-down';
   return 'is-watch';
+}
+
+async function toggleEventPin(event: StoryEvent) {
+  if (!entry.value) return;
+  const list = [...(entry.value.events ?? [])];
+  const index = list.findIndex(
+    item =>
+      (item.id && item.id === event.id) || (item.messageIndex === event.messageIndex && item.summary === event.summary),
+  );
+  if (index < 0) return;
+
+  const current = list[index];
+  const nextPinned = !current.pinned;
+  if (nextPinned) {
+    const pinnedCount = list.filter(item => item.pinned).length;
+    if (pinnedCount >= 3) {
+      toastr.warning('置顶事件最多 3 条');
+      return;
+    }
+  }
+
+  list[index] = { ...current, pinned: nextPinned };
+  entry.value.events = list;
+  await persistEntry();
 }
 
 function toggleTodoForm() {

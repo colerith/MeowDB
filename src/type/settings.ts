@@ -27,11 +27,12 @@ export const Settings = z
     api_active_profile_id: z.string().default(''),
 
     relations_prompt: z.string().default(''),
+    events_prompt: z.string().default(''),
     echoes_prompt: z.string().default(''),
     relation_colors: z.array(z.string()).length(5).default(['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd']),
 
     visual_panel_collapsed: z.boolean().default(false),
-    visual_active_tab: z.enum(['status', 'relations', 'echoes', 'settings']).default('status'),
+    visual_active_tab: z.enum(['status', 'events', 'relations', 'echoes', 'settings']).default('status'),
   })
   .prefault({});
 

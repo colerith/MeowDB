@@ -237,6 +237,27 @@
           <section class="meowdb-prompt-card">
             <header class="meowdb-prompt-card-head">
               <div>
+                <h4>事件 更新提示词</h4>
+                <p>用于维护事件时间轴、消息序号映射、事件标签与置顶事件策略。</p>
+              </div>
+              <button class="menu_button meowdb-tool-btn" type="button" @click="restoreEventsPrompt">恢复默认</button>
+            </header>
+
+            <textarea
+              class="meowdb-input meowdb-prompt-textarea"
+              v-model="settings.events_prompt"
+              rows="8"
+              placeholder="留空将使用默认事件提示词"
+            />
+
+            <div class="meowdb-prompt-meta">
+              <span>字符数：{{ settings.events_prompt?.length || 0 }}</span>
+              <span>留空 = 使用内置默认</span>
+            </div>
+          </section>
+          <section class="meowdb-prompt-card">
+            <header class="meowdb-prompt-card-head">
+              <div>
                 <h4>承诺 更新提示词</h4>
                 <p>用于维护承诺池与待办池（根据状态处理、实现与清理）。</p>
               </div>
@@ -263,7 +284,11 @@
 
 <script setup lang="ts">
 import { sampleEntry } from '@/data/sample-entry';
-import { DEFAULT_ECHOES_PROMPT, DEFAULT_RELATIONS_PROMPT } from '@/modules/ai-updater/prompt-builder';
+import {
+  DEFAULT_ECHOES_PROMPT,
+  DEFAULT_EVENTS_PROMPT,
+  DEFAULT_RELATIONS_PROMPT,
+} from '@/modules/ai-updater/prompt-builder';
 import { clearAllEntries, saveCurrentEntry } from '@/modules/data-manager';
 import { useSettingsStore } from '@/store/settings';
 import { storeToRefs } from 'pinia';
@@ -561,6 +586,11 @@ function restoreRelationsPrompt() {
   toastr.success('已还原默认 relations 提示词');
 }
 
+function restoreEventsPrompt() {
+  settings.value.events_prompt = DEFAULT_EVENTS_PROMPT;
+  toastr.success('已还原默认事件提示词');
+}
+
 function restoreEchoesPrompt() {
   settings.value.echoes_prompt = DEFAULT_ECHOES_PROMPT;
   toastr.success('已还原默认 echoes 提示词');
@@ -592,6 +622,7 @@ onMounted(() => {
   applyProfileToFields(activeProfile.value);
 
   if (!settings.value.relations_prompt?.trim()) settings.value.relations_prompt = DEFAULT_RELATIONS_PROMPT;
+  if (!settings.value.events_prompt?.trim()) settings.value.events_prompt = DEFAULT_EVENTS_PROMPT;
   if (!settings.value.echoes_prompt?.trim()) settings.value.echoes_prompt = DEFAULT_ECHOES_PROMPT;
 });
 </script>

@@ -96,6 +96,35 @@ export const sampleEntry: MeowDBEntry = {
       aiBaseline: {},
     },
   ],
+  events: [
+    {
+      id: 'evt-003',
+      messageIndex: 18,
+      time: '2026-03-19 星期四 | 21:30 微雨',
+      location: '新婚公寓 - 客厅沙发区',
+      summary: '婚礼结束后，角色们回到家中休息。氛围由热闹转向私密，主要互动集中在放松、回顾婚礼细节与确认彼此边界。',
+      tag: '关键',
+      pinned: true,
+    },
+    {
+      id: 'evt-002',
+      messageIndex: 17,
+      time: '2026-03-19 星期四 | 21:10',
+      location: '新婚公寓 - 玄关',
+      summary: '两人刚回到公寓，开始讨论婚礼上未说完的话题。',
+      tag: '日常',
+      pinned: false,
+    },
+    {
+      id: 'evt-001',
+      messageIndex: 16,
+      time: '2026-03-19 星期四 | 20:40',
+      location: '婚礼会场外',
+      summary: '离场前与亲友告别，确认后续相册与预算安排。',
+      tag: '转折',
+      pinned: false,
+    },
+  ],
   echoes: [
     {
       character: 'Ghost - 婚后',

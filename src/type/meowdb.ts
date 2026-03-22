@@ -60,6 +60,16 @@ export const TodoSchema = z.object({
   status: z.enum(['待执行', '进行中', '已完成']).default('待执行'),
 });
 
+export const StoryEventSchema = z.object({
+  id: z.string().trim().default(''),
+  messageIndex: z.number().int().min(1).default(1),
+  time: z.string().default(''),
+  location: z.string().default(''),
+  summary: z.string().default(''),
+  tag: z.enum(['日常', '转折', '关键', '大事件']).default('日常'),
+  pinned: z.boolean().default(false),
+});
+
 export const ArchivedNPCSchema = z.object({
   name: z.string().trim().min(1),
   location: z.string().default(''),
@@ -96,6 +106,7 @@ export const MeowDBEntrySchema = z.object({
   }),
   plot: z.string().default(''),
   relations: z.array(CharacterRelationSchema).default([]),
+  events: z.array(StoryEventSchema).default([]),
   echoes: z.array(EchoSchema).default([]),
   todos: z.array(TodoSchema).default([]),
   archived: z.array(ArchivedNPCSchema).default([]),
@@ -109,6 +120,7 @@ export type AppearanceParts = z.infer<typeof AppearancePartsSchema>;
 export type CharacterRelation = z.infer<typeof CharacterRelationSchema>;
 export type Echo = z.infer<typeof EchoSchema>;
 export type Todo = z.infer<typeof TodoSchema>;
+export type StoryEvent = z.infer<typeof StoryEventSchema>;
 export type ArchivedNPC = z.infer<typeof ArchivedNPCSchema>;
 export type Enigma = z.infer<typeof EnigmaSchema>;
 export type Seed = z.infer<typeof SeedSchema>;
