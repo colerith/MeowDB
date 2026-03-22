@@ -287,7 +287,12 @@
           </div>
         </div>
       </Transition>
-      <aside v-if="selectedRelation" class="meowdb-rel-detail-mask" @click.self="selectedRelation = null">
+      <aside
+        v-if="selectedRelation"
+        v-mount-rel-overlay
+        class="meowdb-rel-detail-mask"
+        @click.self="selectedRelation = null"
+      >
         <article
           class="meowdb-rel-detail"
           @keydown.left.prevent="selectPrev"
@@ -410,6 +415,32 @@ interface EditableField {
 }
 
 const defaultPalette = ['#7dd3fc', '#f9a8d4', '#86efac', '#fcd34d', '#c4b5fd'];
+
+const RELATION_OVERLAY_ROOT_ID = 'MeowDB_relation_overlay_root';
+
+function ensureRelationOverlayRoot(): HTMLElement {
+  let root = document.getElementById(RELATION_OVERLAY_ROOT_ID) as HTMLElement | null;
+  if (!root) {
+    root = document.createElement('div');
+    root.id = RELATION_OVERLAY_ROOT_ID;
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+const vMountRelOverlay = {
+  mounted(el: HTMLElement) {
+    const root = ensureRelationOverlayRoot();
+    if (el.parentElement !== root) root.appendChild(el);
+  },
+  updated(el: HTMLElement) {
+    const root = ensureRelationOverlayRoot();
+    if (el.parentElement !== root) root.appendChild(el);
+  },
+  unmounted(el: HTMLElement) {
+    el.remove();
+  },
+};
 
 const coreFields: EditableField[] = [
   { key: 'gender', label: '性别' },
