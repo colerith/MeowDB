@@ -1,13 +1,23 @@
 {
+<<<<<<< HEAD
   "display_name": "喵喵表格",
+=======
+  "display_name": "<插件名称>",
+>>>>>>> 5f16239387e93ce6f432daceec2bce3ebd350bbd
   "loading_order": 120,
   "requires": [],
   "optional": [],
   "js": "dist/index.js",
   "css": "dist/index.css",
+<<<<<<< HEAD
   "author": "电波系",
   "version": "1.0.0",
   "homePage": "https://github.com/colerith/MeowDB",
+=======
+  "author": "<作者名称>",
+  "version": "1.0.0",
+  "homePage": "<仓库URL>",
+>>>>>>> 5f16239387e93ce6f432daceec2bce3ebd350bbd
   "auto_update": true,
   "i18n": {
     "en": "i18n/en.json"
