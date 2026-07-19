@@ -1,4 +1,5 @@
 export type Settings = z.infer<typeof Settings>;
+<<<<<<< HEAD
 
 const ApiProfile = z.object({
   id: z.string().default(''),
@@ -37,3 +38,12 @@ export const Settings = z
   .prefault({});
 
 export const setting_field = 'meowdb';
+=======
+export const Settings = z
+  .object({
+    button_selected: z.boolean().default(false),
+  })
+  .prefault({});
+
+export const setting_field = 'tavern_extension_example';
+>>>>>>> 67191711fc1d3c98fbb012cd46e1ca2e546d5945
