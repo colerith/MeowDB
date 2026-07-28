@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "喵喵表格",
+=======
+  "name": "<插件名称>",
+>>>>>>> a036f583237b4ba9cd20c61d9c22708bbc2e2ddc
   "version": "1.0.0",
   "scripts": {
     "build": "vite build",
